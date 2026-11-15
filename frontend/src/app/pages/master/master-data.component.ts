@@ -1,11 +1,12 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { DataService } from '../../core/data.service';
-import { AsetPpsu, Rt, Rw, UserAccount } from '../../core/models';
+import { AnggotaLmk, AsetPpsu, Rt, Rw, UserAccount } from '../../core/models';
 
-type TabMaster = 'RW' | 'RT' | 'JUMANTIK' | 'PPSU' | 'ALAT' | 'TEMPLATE_DAOP';
+type TabMaster = 'RW' | 'RT' | 'LMK' | 'JUMANTIK' | 'PPSU' | 'ALAT' | 'TEMPLATE_DAOP';
 type FieldErrRw = { nomor?: string; namaKetua?: string; telepon?: string };
 type FieldErrRt = { nomor?: string; namaKetua?: string; telepon?: string; rwId?: string };
 type FieldErrAkun = {
@@ -22,7 +23,7 @@ type FieldErrAkun = {
 @Component({
   selector: 'app-master-data',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   template: `
     <div class="space-y-5">
       <header>
@@ -35,8 +36,8 @@ type FieldErrAkun = {
         </h1>
         <p class="page-sub">
           @if (masterPenuh()) {
-            Akses Lurah / Admin Kelurahan: kelola wilayah RT/RW, akun petugas, stok alat, dan
-            <strong>template kosong DAOP</strong> resmi untuk diunduh Ketua RT/RW.
+            Akses Lurah / Admin Kelurahan: kelola RT/RW, <strong>anggota LMK</strong> (1 perwakilan/RW),
+            akun petugas, stok alat, dan template DAOP.
           } @else {
             Akses Ketua Bidang PPSU: kelola <strong>akun petugas PPSU</strong> dan
             <strong>stok alat gudang</strong> (tanpa mengubah data RT/RW/Jumantik/DAOP).
@@ -44,49 +45,27 @@ type FieldErrAkun = {
         </p>
       </header>
 
-      <div class="flex flex-wrap gap-2">
-        @if (masterPenuh()) {
-          <button type="button" class="rounded-xl border-2 px-4 py-2 text-sm font-bold" [class]="tabClass('RW')" (click)="tab.set('RW')">
-            Ketua RW
-          </button>
-          <button type="button" class="rounded-xl border-2 px-4 py-2 text-sm font-bold" [class]="tabClass('RT')" (click)="tab.set('RT')">
-            Ketua RT
-          </button>
-          <button
-            type="button"
-            class="rounded-xl border-2 px-4 py-2 text-sm font-bold"
-            [class]="tabClass('JUMANTIK')"
-            (click)="tab.set('JUMANTIK')"
-          >
-            Staff Jumantik
-          </button>
-        }
-        <button
-          type="button"
-          class="rounded-xl border-2 px-4 py-2 text-sm font-bold"
-          [class]="tabClass('PPSU')"
-          (click)="tab.set('PPSU')"
+      <div class="max-w-md">
+        <label class="field-label" for="master-tab">Kelola data</label>
+        <select
+          id="master-tab"
+          class="field-input font-semibold"
+          [ngModel]="tab()"
+          (ngModelChange)="pilihTab($event)"
+          name="master-tab"
         >
-          Petugas PPSU
-        </button>
-        <button
-          type="button"
-          class="rounded-xl border-2 px-4 py-2 text-sm font-bold"
-          [class]="tabClass('ALAT')"
-          (click)="tab.set('ALAT')"
-        >
-          Stok alat PPSU
-        </button>
-        @if (masterPenuh()) {
-          <button
-            type="button"
-            class="rounded-xl border-2 px-4 py-2 text-sm font-bold"
-            [class]="tabClass('TEMPLATE_DAOP')"
-            (click)="tab.set('TEMPLATE_DAOP')"
-          >
-            Template DAOP
-          </button>
-        }
+          @if (masterPenuh()) {
+            <option value="RW">Ketua RW</option>
+            <option value="RT">Ketua RT</option>
+            <option value="LMK">Anggota LMK</option>
+            <option value="JUMANTIK">Staff Jumantik</option>
+          }
+          <option value="PPSU">Petugas PPSU</option>
+          <option value="ALAT">Stok alat PPSU</option>
+          @if (masterPenuh()) {
+            <option value="TEMPLATE_DAOP">Template DAOP</option>
+          }
+        </select>
       </div>
 
       @if (tab() === 'RW') {
@@ -148,6 +127,18 @@ type FieldErrAkun = {
                     <p class="mt-1 text-xs font-medium text-rose-600">{{ errRw().telepon }}</p>
                   }
                 </div>
+                <div>
+                  <label class="field-label" for="tambah-rw-mulai">Jabatan mulai</label>
+                  <input id="tambah-rw-mulai" type="date" class="field-input" [(ngModel)]="formRw.jabatanMulai" name="tambah-rw-mulai" />
+                </div>
+                <div>
+                  <label class="field-label" for="tambah-rw-selesai">Jabatan selesai</label>
+                  <input id="tambah-rw-selesai" type="date" class="field-input" [(ngModel)]="formRw.jabatanSelesai" name="tambah-rw-selesai" />
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="field-label" for="tambah-rw-sk">Nomor SK</label>
+                  <input id="tambah-rw-sk" class="field-input" [(ngModel)]="formRw.nomorSk" name="tambah-rw-sk" placeholder="Contoh: 12/SK-RW/RWJ/I/2023" />
+                </div>
               </div>
               <div class="mt-3 flex flex-wrap gap-2">
                 <button type="button" class="btn-primary !py-2 !px-3 text-sm" (click)="simpanTambahRw()">
@@ -201,6 +192,25 @@ type FieldErrAkun = {
                       <p class="mt-1 text-xs font-medium text-rose-600">{{ errRw().telepon }}</p>
                     }
                   </div>
+                  <div>
+                    <label class="field-label">Jabatan mulai</label>
+                    <input type="date" class="field-input" [(ngModel)]="formRw.jabatanMulai" name="rw-mulai-{{ rw.id }}" />
+                  </div>
+                  <div>
+                    <label class="field-label">Jabatan selesai</label>
+                    <input type="date" class="field-input" [(ngModel)]="formRw.jabatanSelesai" name="rw-selesai-{{ rw.id }}" />
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="field-label">Nomor SK</label>
+                    <input class="field-input" [(ngModel)]="formRw.nomorSk" name="rw-skno-{{ rw.id }}" />
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="field-label">Unggah file SK (PDF/foto)</label>
+                    <input class="field-input" type="file" accept="application/pdf,image/*" (change)="onSkRw(rw.id, $event)" />
+                    @if (rw.skFileName) {
+                      <p class="mt-1 text-xs text-slate-600">Arsip asli terunggah: {{ rw.skFileName }}</p>
+                    }
+                  </div>
                 </div>
                 <div class="mt-3 flex flex-wrap gap-2">
                   <button type="button" class="btn-primary !py-2 !px-3 text-sm" (click)="simpanRw(rw.id)">Simpan</button>
@@ -211,10 +221,31 @@ type FieldErrAkun = {
                   <div>
                     <p class="font-bold text-slate-900">{{ data.labelRw(rw.nomor) }} · {{ rw.namaKetua }}</p>
                     <p class="text-sm text-slate-500">WA: {{ rw.telepon || '—' }}</p>
+                    <p class="mt-1 text-xs text-slate-500">
+                      Jabatan {{ rw.jabatanMulai || '—' }} s.d. {{ rw.jabatanSelesai || '—' }}
+                      · SK {{ rw.nomorSk || '—' }}
+                    </p>
+                    <div class="mt-1 flex flex-wrap items-center gap-2">
+                      <span class="rounded-full px-2 py-0.5 text-[11px] font-bold" [class]="badgeJabatan(rw.jabatanSelesai)">
+                        {{ data.labelStatusMasaJabatan(data.statusMasaJabatan(rw.jabatanSelesai)) }}
+                      </span>
+                      @if (rw.skFileName) {
+                        <span class="text-xs font-semibold text-slate-500">Arsip SK ada</span>
+                      }
+                    </div>
                   </div>
-                  <button type="button" class="btn-secondary !py-2 !px-3 text-sm" (click)="mulaiEditRw(rw)">
-                    Edit
-                  </button>
+                  <div class="flex flex-wrap gap-2">
+                    <a
+                      class="btn-primary !py-2 !px-3 text-sm"
+                      [routerLink]="['/app/master/sk-cetak']"
+                      [queryParams]="{ jenis: 'RW', id: rw.id }"
+                    >
+                      Cetak SK
+                    </a>
+                    <button type="button" class="btn-secondary !py-2 !px-3 text-sm" (click)="mulaiEditRw(rw)">
+                      Edit
+                    </button>
+                  </div>
                 </div>
               }
             </article>
@@ -308,6 +339,18 @@ type FieldErrAkun = {
                     <p class="mt-1 text-xs font-medium text-rose-600">{{ errRt().telepon }}</p>
                   }
                 </div>
+                <div>
+                  <label class="field-label" for="tambah-rt-mulai">Jabatan mulai</label>
+                  <input id="tambah-rt-mulai" type="date" class="field-input" [(ngModel)]="formRt.jabatanMulai" name="tambah-rt-mulai" />
+                </div>
+                <div>
+                  <label class="field-label" for="tambah-rt-selesai">Jabatan selesai</label>
+                  <input id="tambah-rt-selesai" type="date" class="field-input" [(ngModel)]="formRt.jabatanSelesai" name="tambah-rt-selesai" />
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="field-label" for="tambah-rt-sk">Nomor SK</label>
+                  <input id="tambah-rt-sk" class="field-input" [(ngModel)]="formRt.nomorSk" name="tambah-rt-sk" />
+                </div>
               </div>
               <div class="mt-3 flex flex-wrap gap-2">
                 <button type="button" class="btn-primary !py-2 !px-3 text-sm" (click)="simpanTambahRt()">
@@ -377,6 +420,25 @@ type FieldErrAkun = {
                       <p class="mt-1 text-xs font-medium text-rose-600">{{ errRt().telepon }}</p>
                     }
                   </div>
+                  <div>
+                    <label class="field-label">Jabatan mulai</label>
+                    <input type="date" class="field-input" [(ngModel)]="formRt.jabatanMulai" name="rt-mulai-{{ rt.id }}" />
+                  </div>
+                  <div>
+                    <label class="field-label">Jabatan selesai</label>
+                    <input type="date" class="field-input" [(ngModel)]="formRt.jabatanSelesai" name="rt-selesai-{{ rt.id }}" />
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="field-label">Nomor SK</label>
+                    <input class="field-input" [(ngModel)]="formRt.nomorSk" name="rt-skno-{{ rt.id }}" />
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="field-label">Unggah file SK (PDF/foto)</label>
+                    <input class="field-input" type="file" accept="application/pdf,image/*" (change)="onSkRt(rt.id, $event)" />
+                    @if (rt.skFileName) {
+                      <p class="mt-1 text-xs text-slate-600">Arsip asli terunggah: {{ rt.skFileName }}</p>
+                    }
+                  </div>
                 </div>
                 <div class="mt-3 flex flex-wrap gap-2">
                   <button type="button" class="btn-primary !py-2 !px-3 text-sm" (click)="simpanRt(rt.id)">Simpan</button>
@@ -387,13 +449,138 @@ type FieldErrAkun = {
                   <div>
                     <p class="font-bold text-slate-900">{{ data.labelWilayah(rt.id) }} · {{ rt.namaKetua }}</p>
                     <p class="text-sm text-slate-500">WA: {{ rt.telepon || '—' }}</p>
+                    <p class="mt-1 text-xs text-slate-500">
+                      Jabatan {{ rt.jabatanMulai || '—' }} s.d. {{ rt.jabatanSelesai || '—' }}
+                      · SK {{ rt.nomorSk || '—' }}
+                    </p>
+                    <div class="mt-1 flex flex-wrap items-center gap-2">
+                      <span class="rounded-full px-2 py-0.5 text-[11px] font-bold" [class]="badgeJabatan(rt.jabatanSelesai)">
+                        {{ data.labelStatusMasaJabatan(data.statusMasaJabatan(rt.jabatanSelesai)) }}
+                      </span>
+                      @if (rt.skFileName) {
+                        <span class="text-xs font-semibold text-slate-500">Arsip SK ada</span>
+                      }
+                    </div>
                   </div>
-                  <button type="button" class="btn-secondary !py-2 !px-3 text-sm" (click)="mulaiEditRt(rt)">
-                    Edit
-                  </button>
+                  <div class="flex flex-wrap gap-2">
+                    <a
+                      class="btn-primary !py-2 !px-3 text-sm"
+                      [routerLink]="['/app/master/sk-cetak']"
+                      [queryParams]="{ jenis: 'RT', id: rt.id }"
+                    >
+                      Cetak SK
+                    </a>
+                    <button type="button" class="btn-secondary !py-2 !px-3 text-sm" (click)="mulaiEditRt(rt)">
+                      Edit
+                    </button>
+                  </div>
                 </div>
               }
             </article>
+          }
+        </section>
+      }
+
+      @if (tab() === 'LMK') {
+        <section class="card space-y-3 !p-4">
+          <div>
+            <p class="text-sm font-semibold text-slate-800">Lembaga Musyawarah Kelurahan (LMK)</p>
+            <p class="mt-1 text-xs text-slate-500">
+              Satu lembaga di tingkat kelurahan (mitra Lurah). Anggota = 1 tokoh masyarakat per RW
+              (Perda DKI 5/2010 jo. 4/2024) — bukan struktur Ketua/Sekretaris/Bendahara.
+            </p>
+            <p class="mt-2 text-sm text-slate-500">
+              {{ data.anggotaLmksSorted().length }} / {{ rws().length }} RW sudah punya perwakilan
+            </p>
+          </div>
+
+          <article class="rounded-xl border-2 border-blue-200 bg-blue-50/40 p-3">
+            <p class="mb-3 text-sm font-bold text-blue-900">Tambah / isi perwakilan</p>
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label class="field-label" for="lmk-rw">RW yang diwakili</label>
+                <select id="lmk-rw" class="field-input" [(ngModel)]="formLmk.rwId" name="lmk-rw">
+                  <option value="">— Pilih RW —</option>
+                  @for (rw of rwsTanpaLmk(); track rw.id) {
+                    <option [value]="rw.id">{{ data.labelRw(rw.nomor) }}</option>
+                  }
+                </select>
+              </div>
+              <div>
+                <label class="field-label" for="lmk-nama">Nama tokoh / perwakilan</label>
+                <input id="lmk-nama" class="field-input" [(ngModel)]="formLmk.nama" name="lmk-nama" />
+              </div>
+              <div>
+                <label class="field-label" for="lmk-tel">No. WA</label>
+                <input id="lmk-tel" class="field-input" [(ngModel)]="formLmk.telepon" name="lmk-tel" placeholder="08…" />
+              </div>
+              <div>
+                <label class="field-label" for="lmk-sk">No. SK / keterangan (opsional)</label>
+                <input id="lmk-sk" class="field-input" [(ngModel)]="formLmk.nomorSk" name="lmk-sk" />
+              </div>
+            </div>
+            <div class="mt-3">
+              <button type="button" class="btn-primary !py-2 !px-3 text-sm" (click)="simpanTambahLmk()">Simpan</button>
+            </div>
+          </article>
+
+          @for (a of data.anggotaLmksSorted(); track a.id) {
+            <article class="rounded-xl border border-slate-200 p-3">
+              @if (editLmkId() === a.id) {
+                <div class="grid gap-3 sm:grid-cols-2">
+                  <div class="sm:col-span-2">
+                    <p class="text-sm font-bold text-slate-800">{{ data.labelRw(data.getRw(a.rwId)?.nomor || '') }}</p>
+                  </div>
+                  <div>
+                    <label class="field-label">Nama</label>
+                    <input class="field-input" [(ngModel)]="formLmk.nama" name="lmk-edit-nama-{{ a.id }}" />
+                  </div>
+                  <div>
+                    <label class="field-label">No. WA</label>
+                    <input class="field-input" [(ngModel)]="formLmk.telepon" name="lmk-edit-tel-{{ a.id }}" />
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="field-label">No. SK</label>
+                    <input class="field-input" [(ngModel)]="formLmk.nomorSk" name="lmk-edit-sk-{{ a.id }}" />
+                  </div>
+                </div>
+                <div class="mt-3 flex flex-wrap gap-2">
+                  <button type="button" class="btn-primary !py-2 !px-3 text-sm" (click)="simpanLmk(a.id)">Simpan</button>
+                  <button type="button" class="btn-secondary !py-2 !px-3 text-sm" (click)="batalEdit()">Batal</button>
+                </div>
+              } @else {
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <p class="font-bold text-slate-900">{{ a.nama }}</p>
+                    <p class="text-sm text-slate-600">
+                      Perwakilan LMK · {{ data.labelRw(data.getRw(a.rwId)?.nomor || '') }}
+                    </p>
+                    <p class="text-xs text-slate-500">
+                      WA {{ a.telepon || '—' }} · SK {{ a.nomorSk || '—' }}
+                      @if (!a.isActive) {
+                        · <span class="font-semibold text-rose-600">nonaktif</span>
+                      }
+                    </p>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <a
+                      class="btn-primary !py-2 !px-3 text-sm"
+                      [routerLink]="['/app/master/sk-cetak']"
+                      [queryParams]="{ jenis: 'LMK', id: a.id }"
+                    >
+                      Cetak SK
+                    </a>
+                    <button type="button" class="btn-secondary !py-2 !px-3 text-sm" (click)="mulaiEditLmk(a)">
+                      Edit
+                    </button>
+                  </div>
+                </div>
+              }
+            </article>
+          } @empty {
+            <p class="rounded-xl border border-dashed border-slate-300 px-4 py-8 text-center text-sm text-slate-500">
+              Belum ada anggota LMK.
+            </p>
           }
         </section>
       }
@@ -1246,8 +1433,25 @@ export class MasterDataComponent {
     'Koordinator semua zona',
   ];
 
-  formRw = { nomor: '', namaKetua: '', telepon: '' };
-  formRt = { nomor: '', namaKetua: '', telepon: '', rwId: '' };
+  formRw = {
+    nomor: '',
+    namaKetua: '',
+    telepon: '',
+    jabatanMulai: '',
+    jabatanSelesai: '',
+    nomorSk: '',
+  };
+  formRt = {
+    nomor: '',
+    namaKetua: '',
+    telepon: '',
+    rwId: '',
+    jabatanMulai: '',
+    jabatanSelesai: '',
+    nomorSk: '',
+  };
+  formLmk = { rwId: '', nama: '', telepon: '', nomorSk: '' };
+  readonly editLmkId = signal<string | null>(null);
   formAkun = {
     name: '',
     email: '',
@@ -1319,10 +1523,14 @@ export class MasterDataComponent {
 
   readonly alat = computed(() => [...this.data.asetPpsus()]);
 
-  tabClass(t: TabMaster): string {
-    return this.tab() === t
-      ? 'border-blue-600 bg-blue-50 text-blue-800'
-      : 'border-slate-200 bg-white text-slate-600';
+  pilihTab(value: string): void {
+    const allowed: TabMaster[] = this.masterPenuh()
+      ? ['RW', 'RT', 'LMK', 'JUMANTIK', 'PPSU', 'ALAT', 'TEMPLATE_DAOP']
+      : ['PPSU', 'ALAT'];
+    if (allowed.includes(value as TabMaster)) {
+      this.tab.set(value as TabMaster);
+      this.batalEdit();
+    }
   }
 
   inputClass(hasError: boolean): string {
@@ -1650,13 +1858,27 @@ export class MasterDataComponent {
   mulaiEditRw(rw: Rw): void {
     this.batalEdit();
     this.editRwId.set(rw.id);
-    this.formRw = { nomor: rw.nomor, namaKetua: rw.namaKetua, telepon: rw.telepon || '' };
+    this.formRw = {
+      nomor: rw.nomor,
+      namaKetua: rw.namaKetua,
+      telepon: rw.telepon || '',
+      jabatanMulai: rw.jabatanMulai || '',
+      jabatanSelesai: rw.jabatanSelesai || '',
+      nomorSk: rw.nomorSk || '',
+    };
   }
 
   mulaiTambahRw(): void {
     this.batalEdit();
     this.tambahRwOpen.set(true);
-    this.formRw = { nomor: '', namaKetua: '', telepon: '' };
+    this.formRw = {
+      nomor: '',
+      namaKetua: '',
+      telepon: '',
+      jabatanMulai: '',
+      jabatanSelesai: '',
+      nomorSk: '',
+    };
   }
 
   simpanTambahRw(): void {
@@ -1665,6 +1887,9 @@ export class MasterDataComponent {
       nomor: this.formRw.nomor,
       namaKetua: this.formRw.namaKetua,
       telepon: this.formRw.telepon.trim() || undefined,
+      jabatanMulai: this.formRw.jabatanMulai || undefined,
+      jabatanSelesai: this.formRw.jabatanSelesai || undefined,
+      nomorSk: this.formRw.nomorSk.trim() || undefined,
     });
     if (ok) this.batalEdit();
   }
@@ -1675,8 +1900,29 @@ export class MasterDataComponent {
       nomor: this.formRw.nomor.trim(),
       namaKetua: this.formRw.namaKetua.trim(),
       telepon: this.formRw.telepon.trim() || undefined,
+      jabatanMulai: this.formRw.jabatanMulai || undefined,
+      jabatanSelesai: this.formRw.jabatanSelesai || undefined,
+      nomorSk: this.formRw.nomorSk.trim() || undefined,
     });
     this.batalEdit();
+  }
+
+  onSkRw(id: string, ev: Event): void {
+    const f = (ev.target as HTMLInputElement).files?.[0] ?? null;
+    this.data.setSkRw(id, f);
+  }
+
+  onSkRt(id: string, ev: Event): void {
+    const f = (ev.target as HTMLInputElement).files?.[0] ?? null;
+    this.data.setSkRt(id, f);
+  }
+
+  badgeJabatan(selesai?: string): string {
+    const s = this.data.statusMasaJabatan(selesai);
+    if (s === 'HABIS') return 'bg-rose-100 text-rose-800';
+    if (s === 'HAMPIR_HABIS') return 'bg-amber-100 text-amber-900';
+    if (s === 'BELUM_DIISI') return 'bg-slate-100 text-slate-600';
+    return 'bg-emerald-100 text-emerald-800';
   }
 
   mulaiEditRt(rt: Rt): void {
@@ -1687,6 +1933,9 @@ export class MasterDataComponent {
       namaKetua: rt.namaKetua,
       telepon: rt.telepon || '',
       rwId: rt.rwId,
+      jabatanMulai: rt.jabatanMulai || '',
+      jabatanSelesai: rt.jabatanSelesai || '',
+      nomorSk: rt.nomorSk || '',
     };
   }
 
@@ -1698,6 +1947,9 @@ export class MasterDataComponent {
       namaKetua: '',
       telepon: '',
       rwId: this.filterRwId() || this.rws()[0]?.id || '',
+      jabatanMulai: '',
+      jabatanSelesai: '',
+      nomorSk: '',
     };
   }
 
@@ -1708,6 +1960,9 @@ export class MasterDataComponent {
       namaKetua: this.formRt.namaKetua,
       telepon: this.formRt.telepon.trim() || undefined,
       rwId: this.formRt.rwId,
+      jabatanMulai: this.formRt.jabatanMulai || undefined,
+      jabatanSelesai: this.formRt.jabatanSelesai || undefined,
+      nomorSk: this.formRt.nomorSk.trim() || undefined,
     });
     if (ok) this.batalEdit();
   }
@@ -1719,6 +1974,9 @@ export class MasterDataComponent {
       namaKetua: this.formRt.namaKetua.trim(),
       telepon: this.formRt.telepon.trim() || undefined,
       rwId: this.formRt.rwId,
+      jabatanMulai: this.formRt.jabatanMulai || undefined,
+      jabatanSelesai: this.formRt.jabatanSelesai || undefined,
+      nomorSk: this.formRt.nomorSk.trim() || undefined,
     });
     this.batalEdit();
   }
@@ -1828,6 +2086,7 @@ export class MasterDataComponent {
   batalEdit(): void {
     this.editRwId.set(null);
     this.editRtId.set(null);
+    this.editLmkId.set(null);
     this.editAsetId.set(null);
     this.editAkunId.set(null);
     this.detailPpsuId.set(null);
@@ -1840,5 +2099,47 @@ export class MasterDataComponent {
     this.errRw.set({});
     this.errRt.set({});
     this.errAkun.set({});
+    this.formLmk = { rwId: '', nama: '', telepon: '', nomorSk: '' };
+  }
+
+  /** RW yang belum punya perwakilan LMK aktif. */
+  rwsTanpaLmk(): Rw[] {
+    const punya = new Set(
+      this.data
+        .anggotaLmks()
+        .filter((a) => a.isActive)
+        .map((a) => a.rwId),
+    );
+    return this.rws().filter((rw) => !punya.has(rw.id));
+  }
+
+  mulaiEditLmk(a: AnggotaLmk): void {
+    this.batalEdit();
+    this.editLmkId.set(a.id);
+    this.formLmk = {
+      rwId: a.rwId,
+      nama: a.nama,
+      telepon: a.telepon || '',
+      nomorSk: a.nomorSk || '',
+    };
+  }
+
+  simpanTambahLmk(): void {
+    const ok = this.data.addAnggotaLmk({
+      rwId: this.formLmk.rwId,
+      nama: this.formLmk.nama,
+      telepon: this.formLmk.telepon.trim() || undefined,
+      nomorSk: this.formLmk.nomorSk.trim() || undefined,
+    });
+    if (ok) this.batalEdit();
+  }
+
+  simpanLmk(id: string): void {
+    this.data.updateAnggotaLmk(id, {
+      nama: this.formLmk.nama.trim(),
+      telepon: this.formLmk.telepon.trim() || undefined,
+      nomorSk: this.formLmk.nomorSk.trim() || undefined,
+    });
+    this.batalEdit();
   }
 }

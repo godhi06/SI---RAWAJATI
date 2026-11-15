@@ -81,6 +81,15 @@ export interface Rw {
   namaKetua: string;
   /** Nomor WA Ketua RW untuk pengingat koordinasi DAOP */
   telepon?: string;
+  /** Masa jabatan (YYYY-MM-DD) */
+  jabatanMulai?: string;
+  jabatanSelesai?: string;
+  /** Nomor SK pengangkatan */
+  nomorSk?: string;
+  /** Arsip SK (demo: blob lokal) */
+  skFileName?: string;
+  skFileUrl?: string;
+  skUploadedAt?: string;
 }
 
 export interface Rt {
@@ -93,6 +102,12 @@ export interface Rt {
   telepon?: string;
   publicToken: string;
   tokenActive: boolean;
+  jabatanMulai?: string;
+  jabatanSelesai?: string;
+  nomorSk?: string;
+  skFileName?: string;
+  skFileUrl?: string;
+  skUploadedAt?: string;
 }
 
 export interface UserAccount {
@@ -160,6 +175,8 @@ export interface WargaPendatang {
   id: string;
   kelurahanId: string;
   rtId: string;
+  /** Opsional taut ke master bangunan kos */
+  rumahWargaId?: string;
   namaPemilikKos: string;
   alamatKos: string;
   namaPenghuni: string;
@@ -173,6 +190,128 @@ export interface WargaPendatang {
   diverifikasiOleh?: string;
   diverifikasiAt?: string;
   catatanVerifikasi?: string;
+  createdAt: string;
+}
+
+/** Status tinggal di wilayah RT — warga tetap vs kos/kontrak (sering ganti). */
+export type StatusTinggalWarga = 'TETAP' | 'KOS' | 'KONTRAK';
+
+/**
+ * Kategori khusus untuk deteksi cepat bantuan (pemerintah / swasta).
+ * Bisa lebih dari satu sekaligus (mis. lansia + penerima bansos).
+ */
+export type KategoriWargaKhusus = 'LANSIA' | 'JANDA' | 'PENERIMA_BANSOS';
+
+/**
+ * Buku data warga digital per RT — ganti tumpukan fotokopi KK.
+ * Diisi Ketua RT / Dasawisma; Lurah & RW pantau.
+ */
+export interface WargaTerdata {
+  id: string;
+  kelurahanId: string;
+  rtId: string;
+  rumahWargaId?: string;
+  nama: string;
+  nik: string;
+  noKk?: string;
+  jenisKelamin?: 'L' | 'P';
+  tempatLahir?: string;
+  tanggalLahir?: string;
+  statusTinggal: StatusTinggalWarga;
+  alamat: string;
+  hubunganKk?: string;
+  pekerjaan?: string;
+  asalDaerah?: string;
+  tanggalMasuk?: string;
+  fotoKkName?: string;
+  fotoKtpName?: string;
+  /** Tag untuk sorting bantuan: lansia / janda / penerima bansos */
+  kategoriKhusus?: KategoriWargaKhusus[];
+  /** Mis. PKH, BPNT, BST, bansos kelurahan, CSR swasta */
+  programBansos?: string;
+  statusVerifikasi: StatusVerifikasi;
+  dicatatOleh: string;
+  catatan?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Kategori buku kas RT (dari kebiasaan bendahara Excel/WA). */
+export type KategoriKasRt =
+  | 'IURAN_WARGA'
+  | 'SETOR_RW'
+  | 'SAMPAH'
+  | 'BANTUAN_SAKIT'
+  | 'OPERASIONAL'
+  | 'DONASI'
+  | 'LAINNYA';
+
+/** Pembayaran iuran kas per warga per bulan — tertaut wargaTerdata (NIK/KK). */
+export interface IuranKasWarga {
+  id: string;
+  kelurahanId: string;
+  rtId: string;
+  wargaTerdataId: string;
+  tahun: number;
+  bulan: number;
+  /** Tanggal bayar YYYY-MM-DD */
+  tanggalBayar: string;
+  nominal?: number;
+  dicatatOleh: string;
+  createdAt: string;
+}
+
+/** Buku kas harian RT — debet masuk, kredit keluar. */
+export interface KasTransaksiRt {
+  id: string;
+  kelurahanId: string;
+  rtId: string;
+  tanggal: string;
+  uraian: string;
+  kategori: KategoriKasRt;
+  debet: number;
+  kredit: number;
+  dicatatOleh: string;
+  createdAt: string;
+}
+
+/** Kategori kas tingkat RW (setor RT, santunan, operasional). */
+export type KategoriKasRw =
+  | 'SETOR_RT'
+  | 'IURAN_RW'
+  | 'SANTUNAN_MENINGGAL'
+  | 'BANTUAN_SAKIT'
+  | 'OPERASIONAL'
+  | 'DONASI'
+  | 'LAINNYA';
+
+/** Buku kas harian RW — ringkas setoran RT + pengeluaran RW. */
+export interface KasTransaksiRw {
+  id: string;
+  kelurahanId: string;
+  rwId: string;
+  /** Opsional: setoran dari RT tertentu */
+  dariRtId?: string;
+  tanggal: string;
+  uraian: string;
+  kategori: KategoriKasRw;
+  debet: number;
+  kredit: number;
+  dicatatOleh: string;
+  createdAt: string;
+}
+
+/** Setoran taawun/kas RW dari tiap RT per bulan — matriks mirip iuran warga. */
+export interface SetoranRtKeRw {
+  id: string;
+  kelurahanId: string;
+  rwId: string;
+  rtId: string;
+  tahun: number;
+  bulan: number;
+  tanggalBayar: string;
+  nominal: number;
+  dicatatOleh: string;
   createdAt: string;
 }
 
@@ -323,6 +462,24 @@ export interface LaporanKeuanganRt {
   updatedAt: string;
 }
 
+/**
+ * Anggota LMK (Lembaga Musyawarah Kelurahan).
+ * Perda DKI: 1 lembaga LMK per kelurahan; anggota = 1 tokoh perwakilan per RW
+ * (bukan struktur Ketua/Sekretaris/Bendahara terpisah per RW).
+ */
+export interface AnggotaLmk {
+  id: string;
+  kelurahanId: string;
+  /** RW yang diwakili (1 RW = 1 anggota) */
+  rwId: string;
+  nama: string;
+  telepon?: string;
+  /** Opsional: nomor SK / surat keterangan pemilihan */
+  nomorSk?: string;
+  catatan?: string;
+  isActive: boolean;
+}
+
 /** Peserta undangan rapat kelurahan. */
 export type JenisPesertaAgenda = 'RT' | 'RW' | 'STAF' | 'TAMU' | 'LMK';
 
@@ -332,7 +489,10 @@ export interface PesertaAgenda {
   id: string;
   jenis: JenisPesertaAgenda;
   nama: string;
-  /** Untuk tamu luar / LMK: jabatan atau lembaga. */
+  /**
+   * Tamu: instansi.
+   * LMK: label "Perwakilan LMK · RW xx" (bukan jabatan Ketua/Sekretaris LMK).
+   */
   instansi?: string;
   /** WA untuk blast undangan (LMK / tamu yang perlu dikirim). */
   telepon?: string;
@@ -421,6 +581,9 @@ export type KodeSuratKeluar = 'UND' | 'KET' | 'LAP' | 'DIS' | 'LAIN';
  * Register nomor surat keluar (mockup).
  * Produksi: nomor unik & urutan di backend agar anti-dobel multi-user.
  */
+/** Penerima sebaran surat keluar kelurahan (terintegrasi portal + WA). */
+export type PenerimaSuratKelurahan = 'RW' | 'RT' | 'LMK';
+
 export interface SuratKeluar {
   id: string;
   kelurahanId: string;
@@ -434,6 +597,11 @@ export interface SuratKeluar {
   tanggalSurat: string;
   dibuatOleh: string;
   catatan?: string;
+  /**
+   * Siapa yang menerima di SI-RAWAJATI / WA:
+   * RW = portal Ketua RW, RT = portal Ketua RT, LMK = blast WA dari kelurahan.
+   */
+  penerimaJenis?: PenerimaSuratKelurahan[];
   /** File scan/PDF opsional (demo blob) */
   fileName?: string;
   fileUrl?: string;
@@ -542,6 +710,137 @@ export interface KalenderOpsItem {
   statusLabel?: string;
 }
 
+/** Pengaduan / laporan warga via RW → disposisi kelurahan. */
+export type StatusPengaduan =
+  | 'BARU'
+  | 'DIDISPOSISI'
+  | 'DIPROSES'
+  | 'SELESAI'
+  | 'DITOLAK';
+
+export type KategoriPengaduan =
+  | 'SALURAN'
+  | 'KEBERSIHAN'
+  | 'PENERANGAN'
+  | 'KEAMANAN'
+  | 'ADMINISTRASI'
+  | 'LAIN';
+
+export type PrioritasPengaduan = 'NORMAL' | 'URGENT';
+
+export interface PengaduanWilayah {
+  id: string;
+  kelurahanId: string;
+  judul: string;
+  isi: string;
+  kategori: KategoriPengaduan;
+  prioritas: PrioritasPengaduan;
+  status: StatusPengaduan;
+  lokasi?: string;
+  rwId: string;
+  rtId?: string;
+  pelaporNama: string;
+  pelaporUserId?: string;
+  /** Disposisi ke staf / PPSU / tetap di RW */
+  disposisiJenis?: JenisPenerimaPerintah;
+  disposisiUserId?: string;
+  disposisiRwId?: string;
+  disposisiLabel?: string;
+  catatanDisposisi?: string;
+  catatanSelesai?: string;
+  didisposisiAt?: string;
+  diprosesAt?: string;
+  selesaiAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Surat masuk kelurahan → disposisi ke Kasi/staf. */
+export type StatusSuratMasuk =
+  | 'BARU'
+  | 'DIDISPOSISI'
+  | 'DIPROSES'
+  | 'SELESAI'
+  | 'DIARSIPKAN';
+
+export interface SuratMasuk {
+  id: string;
+  kelurahanId: string;
+  nomorAgenda: string;
+  nomorSuratAsal?: string;
+  asal: string;
+  perihal: string;
+  tanggalSurat: string;
+  tanggalTerima: string;
+  status: StatusSuratMasuk;
+  ringkasan?: string;
+  disposisiUserId?: string;
+  disposisiLabel?: string;
+  catatanDisposisi?: string;
+  catatanSelesai?: string;
+  didisposisiAt?: string;
+  selesaiAt?: string;
+  dicatatOleh: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Buku tamu dinas / kunjungan ke kelurahan. */
+export type TujuanKunjungan =
+  | 'KOORDINASI'
+  | 'MONITORING'
+  | 'SOSIALISASI'
+  | 'LAYANAN'
+  | 'LAIN';
+
+export interface TamuDinas {
+  id: string;
+  kelurahanId: string;
+  namaTamu: string;
+  instansi: string;
+  jabatan?: string;
+  tujuan: TujuanKunjungan;
+  keperluan: string;
+  tanggal: string;
+  jamDatang: string;
+  jamPulang?: string;
+  didampingiOleh: string;
+  didampingiUserId?: string;
+  catatan?: string;
+  dicatatOleh: string;
+  createdAt: string;
+}
+
+/** Event besar kelurahan + checklist tugas. */
+export type StatusEventBesar = 'PERSIAPAN' | 'BERLANGSUNG' | 'SELESAI' | 'DIBATALKAN';
+
+export type StatusChecklistItem = 'TODO' | 'PROGRESS' | 'DONE';
+
+export interface ChecklistEventItem {
+  id: string;
+  judul: string;
+  picNama: string;
+  picUserId?: string;
+  status: StatusChecklistItem;
+  tenggatAt?: string;
+  catatan?: string;
+  selesaiAt?: string;
+}
+
+export interface EventBesar {
+  id: string;
+  kelurahanId: string;
+  nama: string;
+  tanggal: string;
+  lokasi: string;
+  status: StatusEventBesar;
+  deskripsi?: string;
+  checklist: ChecklistEventItem[];
+  dibuatOleh: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface DemoSeed {
   rws: Rw[];
   rts: Rt[];
@@ -549,6 +848,11 @@ export interface DemoSeed {
   rumahWargas: RumahWarga[];
   laporanPsns: LaporanPsn[];
   wargaPendatangs: WargaPendatang[];
+  wargaTerdatas: WargaTerdata[];
+  iuranKasWargas: IuranKasWarga[];
+  kasTransaksiRts: KasTransaksiRt[];
+  kasTransaksiRws: KasTransaksiRw[];
+  setoranRtKeRws: SetoranRtKeRw[];
   asetPpsus: AsetPpsu[];
   kegiatanSalurans: KegiatanSaluran[];
   laporanKerjaPpsus: LaporanKerjaPpsu[];
@@ -559,4 +863,9 @@ export interface DemoSeed {
   setoranSosials: SetoranSosial[];
   rekapMapPmis: RekapMapPmi[];
   perintahLurahs: PerintahLurah[];
+  pengaduans: PengaduanWilayah[];
+  suratMasuks: SuratMasuk[];
+  tamuDinas: TamuDinas[];
+  eventBesars: EventBesar[];
+  anggotaLmks: AnggotaLmk[];
 }

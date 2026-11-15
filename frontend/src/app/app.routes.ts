@@ -6,10 +6,23 @@ import {
   exportPpsuGuard,
   exportPsnGuard,
   jumantikOnlyGuard,
+  dataWargaGuard,
+  suratKeteranganGuard,
+  suratKelurahanRwGuard,
+  kasRtGuard,
+  kasRwGuard,
   masterDataGuard,
   psnAccessGuard,
   roleGuard,
 } from './core/auth.guard';
+import { DataWargaComponent } from './pages/warga/data-warga.component';
+import { SuratKeteranganComponent } from './pages/warga/surat-keterangan.component';
+import { SuratKeteranganCetakComponent } from './pages/warga/surat-keterangan-cetak.component';
+import { KasRtComponent } from './pages/kas/kas-rt.component';
+import { KasRtCetakComponent } from './pages/kas/kas-rt-cetak.component';
+import { KasRwComponent } from './pages/kas/kas-rw.component';
+import { KasRwCetakComponent } from './pages/kas/kas-rw-cetak.component';
+import { RekapWargaRwComponent } from './pages/warga/rekap-warga-rw.component';
 import { ShellComponent } from './layout/shell.component';
 import { LoginComponent } from './pages/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
@@ -29,10 +42,19 @@ import { DaopComponent } from './pages/daop/daop.component';
 import { DaopCetakComponent } from './pages/daop/daop-cetak.component';
 import { EkbangComponent } from './pages/ekbang/ekbang.component';
 import { MasterDataComponent } from './pages/master/master-data.component';
+import { SkCetakComponent } from './pages/master/sk-cetak.component';
 import { AgendaComponent } from './pages/agenda/agenda.component';
 import { SuratKeluarComponent } from './pages/surat/surat-keluar.component';
 import { PerintahComponent } from './pages/perintah/perintah.component';
 import { KalenderOpsComponent } from './pages/kalender/kalender-ops.component';
+import { RadarMingguanComponent } from './pages/radar/radar-mingguan.component';
+import { PengaduanComponent } from './pages/pengaduan/pengaduan.component';
+import { LaporanLurahComponent } from './pages/laporan/laporan-lurah.component';
+import { SuratMasukComponent } from './pages/surat/surat-masuk.component';
+import { SuratMasukRegisterComponent } from './pages/surat/surat-masuk-register.component';
+import { SuratKelurahanRwComponent } from './pages/surat/surat-kelurahan-rw.component';
+import { TamuDinasComponent } from './pages/tamu/tamu-dinas.component';
+import { EventBesarComponent } from './pages/event/event-besar.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -49,6 +71,51 @@ export const routes: Routes = [
         canActivate: [roleGuard(['ADMIN_KEL', 'KOORD_RW', 'OP_RT'])],
       },
       {
+        path: 'data-warga',
+        component: DataWargaComponent,
+        canActivate: [dataWargaGuard],
+      },
+      {
+        path: 'surat-keterangan',
+        component: SuratKeteranganComponent,
+        canActivate: [suratKeteranganGuard],
+      },
+      {
+        path: 'data-warga/surat-keterangan',
+        component: SuratKeteranganCetakComponent,
+        canActivate: [suratKeteranganGuard],
+      },
+      {
+        path: 'surat-kelurahan-rw',
+        component: SuratKelurahanRwComponent,
+        canActivate: [suratKelurahanRwGuard],
+      },
+      {
+        path: 'kas-rt',
+        component: KasRtComponent,
+        canActivate: [kasRtGuard],
+      },
+      {
+        path: 'kas-rt/cetak',
+        component: KasRtCetakComponent,
+        canActivate: [kasRtGuard],
+      },
+      {
+        path: 'rekap-warga-rw',
+        component: RekapWargaRwComponent,
+        canActivate: [kasRwGuard],
+      },
+      {
+        path: 'kas-rw',
+        component: KasRwComponent,
+        canActivate: [kasRwGuard],
+      },
+      {
+        path: 'kas-rw/cetak',
+        component: KasRwCetakComponent,
+        canActivate: [kasRwGuard],
+      },
+      {
         path: 'ekbang',
         component: EkbangComponent,
         canActivate: [roleGuard(['ADMIN_KEL'])],
@@ -57,6 +124,11 @@ export const routes: Routes = [
         path: 'master',
         component: MasterDataComponent,
         canActivate: [masterDataGuard],
+      },
+      {
+        path: 'master/sk-cetak',
+        component: SkCetakComponent,
+        canActivate: [roleGuard(['ADMIN_KEL'])],
       },
       {
         path: 'agenda',
@@ -74,8 +146,43 @@ export const routes: Routes = [
         canActivate: [roleGuard(['ADMIN_KEL', 'KOORD_RW'])],
       },
       {
+        path: 'radar',
+        component: RadarMingguanComponent,
+        canActivate: [roleGuard(['ADMIN_KEL'])],
+      },
+      {
+        path: 'laporan-lurah',
+        component: LaporanLurahComponent,
+        canActivate: [roleGuard(['ADMIN_KEL'])],
+      },
+      {
+        path: 'pengaduan',
+        component: PengaduanComponent,
+        canActivate: [roleGuard(['ADMIN_KEL', 'KOORD_RW', 'PETUGAS_PPSU'])],
+      },
+      {
         path: 'surat-keluar',
         component: SuratKeluarComponent,
+        canActivate: [roleGuard(['ADMIN_KEL'])],
+      },
+      {
+        path: 'surat-masuk',
+        component: SuratMasukComponent,
+        canActivate: [roleGuard(['ADMIN_KEL'])],
+      },
+      {
+        path: 'surat-masuk/register',
+        component: SuratMasukRegisterComponent,
+        canActivate: [roleGuard(['ADMIN_KEL'])],
+      },
+      {
+        path: 'tamu-dinas',
+        component: TamuDinasComponent,
+        canActivate: [roleGuard(['ADMIN_KEL'])],
+      },
+      {
+        path: 'event-besar',
+        component: EventBesarComponent,
         canActivate: [roleGuard(['ADMIN_KEL'])],
       },
       {

@@ -23,21 +23,24 @@ import { JenisSetoranSosial, SumberSetoranSosial } from '../../core/models';
             {{ data.formatRp(data.nominalWajibBaznas) }} + kupon.
           </p>
         </div>
-        <div class="flex flex-wrap gap-2">
-          <a
-            class="btn-secondary text-sm"
-            [routerLink]="['/app/setoran-pmi-baznas/cetak']"
-            [queryParams]="{ jenis: 'PMI', bulan: bulan(), tahun: tahun() }"
-          >
-            Cetak PDF PMI
-          </a>
-          <a
-            class="btn-primary text-sm"
-            [routerLink]="['/app/setoran-pmi-baznas/cetak']"
-            [queryParams]="{ jenis: 'BAZNAS', bulan: bulan(), tahun: tahun() }"
-          >
-            Cetak PDF BAZNAS
-          </a>
+        <div class="flex flex-col items-stretch gap-1.5 sm:items-end">
+          <p class="text-xs font-semibold text-slate-500">Cetak laporan periode ini</p>
+          <div class="flex flex-wrap gap-2">
+            <a
+              class="btn-primary text-sm"
+              [routerLink]="['/app/setoran-pmi-baznas/cetak']"
+              [queryParams]="{ jenis: 'PMI', bulan: bulan(), tahun: tahun() }"
+            >
+              Cetak PDF PMI
+            </a>
+            <a
+              class="btn-primary text-sm"
+              [routerLink]="['/app/setoran-pmi-baznas/cetak']"
+              [queryParams]="{ jenis: 'BAZNAS', bulan: bulan(), tahun: tahun() }"
+            >
+              Cetak PDF BAZNAS
+            </a>
+          </div>
         </div>
       </header>
 

@@ -48,8 +48,11 @@ export class AuthService {
     if (user.email === 'jumantik@kelurahan.id' || /jumantik/i.test(user.jabatan || '')) {
       return '/app/psn/input';
     }
+    if (user.email === 'dasawisma@kelurahan.id' || /dasawisma|pkk/i.test(user.jabatan || '')) {
+      return '/app/data-warga';
+    }
     if (user.email === 'rt01@kelurahan.id' || /^Ketua RT/i.test(user.jabatan || '')) {
-      return '/app/daop';
+      return '/app/data-warga';
     }
     return this.homePathForRole(user.role);
   }
@@ -78,19 +81,73 @@ export class AuthService {
     return /jumantik/i.test(u.jabatan || '') || /jumantik/i.test(u.email || '');
   });
 
-  /** Ketua RT: fokus setor DAOP, bukan input PSN. */
+  /** Kader Dasawisma / PKK — bantu pendataan warga, verifikasi tetap Ketua RT. */
+  readonly isDasawismaUser = computed(() => {
+    const u = this.currentUserSignal();
+    if (!u || u.role !== 'OP_RT') return false;
+    return /dasawisma|pkk/i.test(u.jabatan || '') || /dasawisma/i.test(u.email || '');
+  });
+
+  /** Ketua RT: DAOP + buku warga (bukan Jumantik / Dasawisma). */
   readonly isKetuaRtUser = computed(() => {
     const u = this.currentUserSignal();
     if (!u || u.role !== 'OP_RT') return false;
-    return !this.isKaderJumantikUser();
+    return !this.isKaderJumantikUser() && !this.isDasawismaUser();
   });
 
   isKaderJumantik(): boolean {
     return this.isKaderJumantikUser();
   }
 
+  isDasawisma(): boolean {
+    return this.isDasawismaUser();
+  }
+
   isKetuaRt(): boolean {
     return this.isKetuaRtUser();
+  }
+
+  /** Buku data warga digital: Lurah, RW (rekap), Ketua RT, Dasawisma. */
+  canAccessDataWarga(): boolean {
+    return (
+      this.isStafKelurahan() ||
+      this.hasRole('KOORD_RW') ||
+      this.isKetuaRtUser() ||
+      this.isDasawismaUser()
+    );
+  }
+
+  /** Surat Keterangan SK/SKD/kematian: urusan RT (+ Dasawisma / staf). Bukan Ketua RW. */
+  canAccessSuratKeterangan(): boolean {
+    return this.isStafKelurahan() || this.isKetuaRtUser() || this.isDasawismaUser();
+  }
+
+  /**
+   * Inbox surat dari kelurahan (undangan/kerja bakti):
+   * Ketua RW & Ketua RT menerima di portal; LMK via WA langsung dari kelurahan.
+   */
+  canAccessSuratDariKelurahan(): boolean {
+    return this.isStafKelurahan() || this.hasRole('KOORD_RW') || this.isKetuaRtUser();
+  }
+
+  /** @deprecated pakai canAccessSuratDariKelurahan */
+  canAccessSuratKelurahanRw(): boolean {
+    return this.canAccessSuratDariKelurahan();
+  }
+
+  /** Kas RT (iuran + buku kas): Ketua RT & staf. RW pakai Kas RW + rekap. */
+  canAccessKasRt(): boolean {
+    return this.isStafKelurahan() || this.isKetuaRtUser();
+  }
+
+  /** Rekap warga & Kas RW: Ketua RW + staf kelurahan. */
+  canAccessKasRw(): boolean {
+    return this.isStafKelurahan() || this.hasRole('KOORD_RW');
+  }
+
+  /** Verifikasi laporan kos / sahkan data: Ketua RT atau staf kelurahan. */
+  canVerifikasiWarga(): boolean {
+    return this.isStafKelurahan() || this.isKetuaRtUser();
   }
 
   /**

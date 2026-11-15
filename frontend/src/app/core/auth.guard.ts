@@ -41,6 +41,56 @@ export const jumantikOnlyGuard: CanActivateFn = () => {
   return router.createUrlTree([user ? auth.homePathForUser(user) : '/app/dashboard']);
 };
 
+/** Data warga digital: staf, RW, Ketua RT, Dasawisma. */
+export const dataWargaGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  if (!auth.isLoggedIn()) return router.createUrlTree(['/login']);
+  if (auth.canAccessDataWarga()) return true;
+  const user = auth.currentUser();
+  return router.createUrlTree([user ? auth.homePathForUser(user) : '/app/dashboard']);
+};
+
+/** Surat Keterangan RT: Ketua RT / Dasawisma / staf — bukan Ketua RW. */
+export const suratKeteranganGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  if (!auth.isLoggedIn()) return router.createUrlTree(['/login']);
+  if (auth.canAccessSuratKeterangan()) return true;
+  const user = auth.currentUser();
+  return router.createUrlTree([user ? auth.homePathForUser(user) : '/app/dashboard']);
+};
+
+/** Inbox surat kelurahan: RW + Ketua RT (+ staf). */
+export const suratKelurahanRwGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  if (!auth.isLoggedIn()) return router.createUrlTree(['/login']);
+  if (auth.canAccessSuratDariKelurahan()) return true;
+  const user = auth.currentUser();
+  return router.createUrlTree([user ? auth.homePathForUser(user) : '/app/dashboard']);
+};
+
+/** Kas RT: staf, Ketua RT. */
+export const kasRtGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  if (!auth.isLoggedIn()) return router.createUrlTree(['/login']);
+  if (auth.canAccessKasRt()) return true;
+  const user = auth.currentUser();
+  return router.createUrlTree([user ? auth.homePathForUser(user) : '/app/dashboard']);
+};
+
+/** Rekap warga / Kas RW: staf, Ketua RW. */
+export const kasRwGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  if (!auth.isLoggedIn()) return router.createUrlTree(['/login']);
+  if (auth.canAccessKasRw()) return true;
+  const user = auth.currentUser();
+  return router.createUrlTree([user ? auth.homePathForUser(user) : '/app/dashboard']);
+};
+
 /** Master Data: staf kelurahan (penuh) atau Ketua Bidang PPSU (alat + petugas). */
 export const masterDataGuard: CanActivateFn = () => {
   const auth = inject(AuthService);

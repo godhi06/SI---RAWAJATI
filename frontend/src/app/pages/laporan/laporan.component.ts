@@ -85,6 +85,21 @@ type PreviewTab = 'KESRA' | 'DAOP' | 'PPSU';
 
         @if (auth.isStafKelurahan()) {
           <article class="card flex flex-col">
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Tata usaha · Surat</p>
+            <h2 class="mt-1 text-lg font-semibold text-slate-900">Register Surat Masuk</h2>
+            <p class="mt-2 flex-1 text-sm text-slate-500">
+              Buku agenda arsip bulanan (tgl terima, no. agenda, asal, disposisi, status). Cetak PDF untuk map /
+              kecamatan.
+            </p>
+            <a routerLink="/app/surat-masuk/register" class="btn-primary mt-4 block w-full text-center">
+              Buka &amp; Cetak Register
+            </a>
+            <a routerLink="/app/surat-masuk" class="mt-2 text-center text-sm font-semibold text-blue-700">
+              Layar kerja Surat Masuk Dinas →
+            </a>
+          </article>
+
+          <article class="card flex flex-col">
             <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Kesra · Undangan</p>
             <h2 class="mt-1 text-lg font-semibold text-slate-900">Template Undangan PSN</h2>
             <p class="mt-2 flex-1 text-sm text-slate-500">

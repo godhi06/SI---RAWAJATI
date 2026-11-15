@@ -1,15 +1,27 @@
 import {
   AgendaRapat,
+  AnggotaLmk,
   DemoSeed,
+  EventBesar,
   Kelurahan,
   KerjaBaktiRw,
   LaporanKeuanganRt,
+  PengaduanWilayah,
   PerintahLurah,
   Rt,
   Rw,
   RekapMapPmi,
   SetoranSosial,
   SuratKeluar,
+  SuratMasuk,
+  TamuDinas,
+  WargaPendatang,
+  WargaTerdata,
+  KategoriWargaKhusus,
+  IuranKasWarga,
+  KasTransaksiRt,
+  KasTransaksiRw,
+  SetoranRtKeRw,
 } from './models';
 
 /** ISO lokal YYYY-MM-DDTHH:mm:ss untuk seed PPSU relatif ke hari ini. */
@@ -177,6 +189,12 @@ export function createDemoSeed(): DemoSeed {
       nomor: '01',
       namaKetua: 'Budi Santoso',
       telepon: '0812-1001-0001',
+      jabatanMulai: '2023-01-15',
+      jabatanSelesai: '2028-01-14',
+      nomorSk: '12/SK-RW/RWJ/I/2023',
+      skFileName: 'SK-RW-01-Budi-Santoso.pdf',
+      skFileUrl: undefined as string | undefined,
+      skUploadedAt: '2023-01-20T10:00:00',
     },
     {
       id: 'rw-3',
@@ -184,14 +202,24 @@ export function createDemoSeed(): DemoSeed {
       nomor: '03',
       namaKetua: 'Siti Aminah',
       telepon: '0812-1003-0001',
+      jabatanMulai: '2022-06-01',
+      jabatanSelesai: '2027-05-31',
+      nomorSk: '08/SK-RW/RWJ/VI/2022',
+      skFileName: 'SK-RW-03-Siti-Aminah.pdf',
+      skUploadedAt: '2022-06-05T09:00:00',
     },
     {
       id: 'rw-7',
       kelurahanId: 'kel-1',
       nomor: '07',
-      namaKetua: 'Agus Salim',
+      namaKetua: 'Susilo',
       // Demo: sama nomor uji WA (RT001/RW 07) agar blast Ketua RW bisa diuji
       telepon: '081295843474',
+      jabatanMulai: '2024-03-01',
+      jabatanSelesai: '2026-12-31',
+      nomorSk: '21/SK-RW/RWJ/III/2024',
+      skFileName: 'SK-RW-07-Agus-Salim.pdf',
+      skUploadedAt: '2024-03-04T11:00:00',
     },
     {
       id: 'rw-11',
@@ -199,6 +227,11 @@ export function createDemoSeed(): DemoSeed {
       nomor: '11',
       namaKetua: 'Endang Wati',
       telepon: '0812-1011-0001',
+      jabatanMulai: '2021-08-01',
+      jabatanSelesai: '2026-07-31',
+      nomorSk: '15/SK-RW/RWJ/VIII/2021',
+      skFileName: 'SK-RW-11-Endang-Wati.pdf',
+      skUploadedAt: '2021-08-10T08:00:00',
     },
   ];
 
@@ -278,13 +311,33 @@ export function createDemoSeed(): DemoSeed {
       tokenActive: true,
     },
     {
-      id: 'rt-7-3',
+      id: 'rt-7-4',
       rwId: 'rw-7',
       kelurahanId: 'kel-1',
-      nomor: '03',
+      nomor: '04',
       namaKetua: 'Bambang Sutrisno',
-      telepon: '0812-7707-0003',
-      publicToken: 'rt03-rw07-rawajati',
+      telepon: '0812-7707-0004',
+      publicToken: 'rt04-rw07-rawajati',
+      tokenActive: true,
+    },
+    {
+      id: 'rt-7-5',
+      rwId: 'rw-7',
+      kelurahanId: 'kel-1',
+      nomor: '05',
+      namaKetua: 'Siti Aminah',
+      telepon: '0812-7707-0005',
+      publicToken: 'rt05-rw07-rawajati',
+      tokenActive: true,
+    },
+    {
+      id: 'rt-7-6',
+      rwId: 'rw-7',
+      kelurahanId: 'kel-1',
+      nomor: '06',
+      namaKetua: 'Dedi Kurniawan',
+      telepon: '0812-7707-0006',
+      publicToken: 'rt06-rw07-rawajati',
       tokenActive: true,
     },
     // RW 11
@@ -308,7 +361,15 @@ export function createDemoSeed(): DemoSeed {
       publicToken: 'rt02-rw11-rawajati',
       tokenActive: true,
     },
-  ];
+  ].map((rt, i) => ({
+    ...rt,
+    jabatanMulai: '2023-01-01',
+    // Demo: beberapa hampir habis / sudah lewat supaya Radar bisa alert
+    jabatanSelesai: i === 0 ? '2026-11-30' : i === 1 ? '2026-10-01' : '2028-12-31',
+    nomorSk: `SK-RT-${rt.nomor}/RW-${rt.rwId.replace('rw-', '')}/2023`,
+    skFileName: `SK-${rt.id}.pdf`,
+    skUploadedAt: '2023-01-10T09:00:00',
+  }));
 
   return {
     rws,
@@ -334,7 +395,7 @@ export function createDemoSeed(): DemoSeed {
       },
       {
         id: 'u-rw',
-        name: 'Agus Salim',
+        name: 'Susilo',
         email: 'rw07@kelurahan.id',
         password: 'rw123',
         role: 'KOORD_RW',
@@ -363,6 +424,19 @@ export function createDemoSeed(): DemoSeed {
         kelurahanId: 'kel-1',
         rwId: 'rw-7',
         rtId: 'rt-1',
+        telepon: '081295843474',
+      },
+      {
+        id: 'u-dasawisma',
+        name: 'Ibu Sulastri',
+        email: 'dasawisma@kelurahan.id',
+        password: 'dasa123',
+        role: 'OP_RT',
+        jabatan: 'Kader Dasawisma / PKK RT001/RW 07',
+        kelurahanId: 'kel-1',
+        rwId: 'rw-7',
+        rtId: 'rt-1',
+        telepon: '0812-7707-0101',
       },
       {
         id: 'u-ppsu',
@@ -685,7 +759,7 @@ export function createDemoSeed(): DemoSeed {
       {
         id: 'rm-44',
         kelurahanId: 'kel-1',
-        rtId: 'rt-7-3',
+        rtId: 'rt-7-4',
         kategori: 'RUMAH_WARGA',
         alamat: 'Jl. Rawajati Barat dalam No. 6',
         noRumah: '6',
@@ -925,7 +999,12 @@ export function createDemoSeed(): DemoSeed {
       },
     ],
 
-    wargaPendatangs: [],
+    wargaPendatangs: seedWargaPendatangRt07(),
+    wargaTerdatas: [...seedWargaTerdataRt07(), ...seedWargaRingkasRw07Lain()],
+    iuranKasWargas: seedIuranKasRt07(),
+    kasTransaksiRts: seedKasTransaksiRt07(),
+    kasTransaksiRws: seedKasTransaksiRw07(),
+    setoranRtKeRws: seedSetoranRtKeRw07(),
 
     asetPpsus: [
       {
@@ -1128,7 +1207,866 @@ export function createDemoSeed(): DemoSeed {
     setoranSosials: seedSetoranSosial(rts, rws),
     rekapMapPmis: seedRekapMapPmi(),
     perintahLurahs: seedPerintahLurah(rws),
+    pengaduans: seedPengaduan(rts, rws),
+    suratMasuks: seedSuratMasuk(),
+    tamuDinas: seedTamuDinas(),
+    eventBesars: seedEventBesar(),
+    anggotaLmks: seedAnggotaLmk(rws),
   };
+}
+
+/** Tag demo lansia / janda / bansos — mudah sorting bantuan. */
+function kategoriDemoRt07(n: number, nama: string, female: boolean): KategoriWargaKhusus[] {
+  const tags: KategoriWargaKhusus[] = [];
+  const lansiaNames = new Set([
+    'Herlan',
+    'Latifah',
+    'Zaitun',
+    'Akhirman',
+    'Jamaludin',
+    'Basoni',
+    'Maemunah Lestaluhu',
+    'Marni',
+    'Samsuri',
+    'Hartanto',
+  ]);
+  const jandaNames = new Set([
+    'Latifah',
+    'Tanti',
+    'Zaitun',
+    'Hanum',
+    'Siti',
+    'Patimah',
+    'Bariati',
+    'Erniza',
+    'Setyawati',
+    'Rita Jami',
+  ]);
+  if (lansiaNames.has(nama) || n % 13 === 0) tags.push('LANSIA');
+  if (female && (jandaNames.has(nama) || n % 17 === 0)) tags.push('JANDA');
+  if (n % 5 === 0 || lansiaNames.has(nama) || jandaNames.has(nama)) tags.push('PENERIMA_BANSOS');
+  return [...new Set(tags)];
+}
+
+/**
+ * Buku warga digital demo — RT001/RW 07.
+ * ~66 KK seperti matriks iuran bendahara Excel (foto WA).
+ */
+function seedWargaTerdataRt07(): WargaTerdata[] {
+  const now = '2026-11-10T09:00:00';
+  /** Nama KK mengikuti Excel bendahara RT 001/07 (66 baris + Sigit). NIK/KK masih dummy — edit di Data Warga. */
+  const kkNames = [
+    'Jhon Henri Saragih',
+    'Akhirman',
+    'Titin Kartini',
+    'Sy. Yasmar Anas',
+    'Moch. Reza Diar',
+    'Jamaludin',
+    'F Mardiyana Lestari',
+    'Ali Alwi',
+    'Iman Santoso',
+    'Ari Riyadi',
+    'Herlan',
+    'Muchlis',
+    'Hartanto',
+    'Basoni',
+    'Rita Jami',
+    'Zarkasih',
+    'Arifin',
+    'Ita Sursahawati',
+    'Aspas Ahmad',
+    'Samsuri',
+    'Siti',
+    'Syamsudin Nurlette',
+    'Nova Andriansyah',
+    'Reni',
+    'Juanda / Nur',
+    'A. Sanusi / Uci',
+    'Abdus Salam',
+    'Achmad Fauzi',
+    'Ika Purnomo',
+    'M. Thoyib',
+    'Puja Sukria',
+    'Patimah',
+    'Ruspinuji Bambang',
+    'M. Fahrudin / Yumi',
+    'M. Soleh',
+    'Abd. Rosyid',
+    'Dodo',
+    'Dilla',
+    'Roidin Met',
+    'Latifah', // di Excel: A. Latif
+    'Ashari',
+    'Slamet Mulyady',
+    'Yusuf Umarella',
+    'Ho Kian Meng / Ayung',
+    'Sondang',
+    'Maridin',
+    'Juriah / Junaedi',
+    'Zainah',
+    'Syaifudin Fitri',
+    'Marni',
+    'Chotif Yani',
+    'Nurul Komar / Nursaidah',
+    'Ida Agen',
+    'Setyawati',
+    'Tanti',
+    'Bariati',
+    'Erniza',
+    'Zaitun',
+    'M Firdaus',
+    'Okta',
+    'Maemunah Lestaluhu',
+    'Mala',
+    'Hanum',
+    'Eka Besi',
+    'Sarah',
+    'Fajar',
+    'Sigit', // tambahan (tidak di foto Excel)
+  ];
+
+  const kk: WargaTerdata[] = kkNames.map((nama, i) => {
+    const n = i + 1;
+    const nik = `317503${String(100000 + n).slice(-6)}${String(n).padStart(4, '0')}`;
+    const female =
+      /wati|hayati|sari|dewi|tuti|rina|putri|hanum|okta|fitri|kartini|rita|siti|reni|patimah|dilla|sondang|zainah|marni|setyawati|tanti|bariati|erniza|zaitun|latifah|maemunah|mala|sarah|juriah|ida |ika /i.test(
+        nama,
+      ) ||
+      [
+        'Titin Kartini',
+        'F Mardiyana Lestari',
+        'Ita Sursahawati',
+        'Siti',
+        'Reni',
+        'Ika Purnomo',
+        'Patimah',
+        'Dilla',
+        'Latifah',
+        'Sondang',
+        'Zainah',
+        'Marni',
+        'Setyawati',
+        'Tanti',
+        'Bariati',
+        'Erniza',
+        'Zaitun',
+        'Okta',
+        'Maemunah Lestaluhu',
+        'Mala',
+        'Hanum',
+        'Sarah',
+        'Rita Jami',
+        'Chotif Yani',
+      ].includes(nama);
+    const kategoriKhusus = kategoriDemoRt07(n, nama, female);
+    const programBansos = kategoriKhusus.includes('PENERIMA_BANSOS')
+      ? n % 3 === 0
+        ? 'PKH'
+        : n % 3 === 1
+          ? 'BPNT'
+          : 'BST / bansos kelurahan'
+      : undefined;
+    return {
+      id: `wt-kk-${n}`,
+      kelurahanId: 'kel-1',
+      rtId: 'rt-1',
+      nama,
+      nik,
+      noKk: nik,
+      jenisKelamin: (female ? 'P' : 'L') as 'L' | 'P',
+      statusTinggal: 'TETAP' as const,
+      alamat: `Jl. Rawajati Timur No. ${n}`,
+      hubunganKk: 'Kepala Keluarga',
+      pekerjaan: female ? 'Ibu rumah tangga' : 'Karyawan / wiraswasta',
+      fotoKkName: n <= 8 ? `KK-${nama.replace(/\s+/g, '-')}.jpg` : undefined,
+      kategoriKhusus: kategoriKhusus.length ? kategoriKhusus : undefined,
+      programBansos,
+      statusVerifikasi: 'DITERIMA' as const,
+      dicatatOleh: 'Muhamad Ardhi',
+      createdAt: now,
+      updatedAt: now,
+    };
+  });
+
+  // Anggota KK + kos (bukan penanggung iuran) — Data Warga lebih hidup
+  const ekstra: WargaTerdata[] = [
+    {
+      id: 'wt-istri-1',
+      kelurahanId: 'kel-1',
+      rtId: 'rt-1',
+      nama: 'Siti Rohmah',
+      nik: '3175035202880002',
+      noKk: kk[2]?.noKk,
+      jenisKelamin: 'P',
+      statusTinggal: 'TETAP',
+      alamat: kk[2]?.alamat || 'Jl. Rawajati Timur No. 3',
+      hubunganKk: 'Istri',
+      pekerjaan: 'Ibu rumah tangga',
+      statusVerifikasi: 'DITERIMA',
+      dicatatOleh: 'Ibu Sulastri',
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: 'wt-kos-1',
+      kelurahanId: 'kel-1',
+      rtId: 'rt-1',
+      rumahWargaId: 'rm-10',
+      nama: 'Rizky Pratama',
+      nik: '3201010101990005',
+      jenisKelamin: 'L',
+      statusTinggal: 'KOS',
+      alamat: 'Jl. Rawajati Timur No. 28 (Kos Ibu Ratna)',
+      pekerjaan: 'Karyawan toko',
+      asalDaerah: 'Depok',
+      tanggalMasuk: '2026-08-01',
+      fotoKtpName: 'KTP-Rizky.jpg',
+      statusVerifikasi: 'DITERIMA',
+      dicatatOleh: 'Muhamad Ardhi',
+      catatan: 'Penghuni kos — verifikasi RT',
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: 'wt-kontrak-1',
+      kelurahanId: 'kel-1',
+      rtId: 'rt-1',
+      rumahWargaId: 'rm-11',
+      nama: 'Nina Kartika',
+      nik: '3276015502950006',
+      jenisKelamin: 'P',
+      statusTinggal: 'KONTRAK',
+      alamat: 'Jl. Binawarga No. 22',
+      pekerjaan: 'Mahasiswa',
+      asalDaerah: 'Bandung',
+      tanggalMasuk: '2026-09-15',
+      fotoKtpName: 'KTP-Nina.jpg',
+      statusVerifikasi: 'DITERIMA',
+      dicatatOleh: 'Ibu Sulastri',
+      createdAt: now,
+      updatedAt: now,
+    },
+  ];
+
+  return [...kk, ...ekstra];
+}
+
+/** Matriks iuran 2026 — pola bayar mirip Excel bendahara (66 KK). */
+function seedIuranKasRt07(): IuranKasWarga[] {
+  const rows: IuranKasWarga[] = [];
+  const hariBayar = [8, 10, 12, 15, 16, 18, 20, 25, 26];
+  const push = (wargaId: string, bulan: number, hari: number) => {
+    const tgl = `2026-${String(bulan).padStart(2, '0')}-${String(hari).padStart(2, '0')}`;
+    rows.push({
+      id: `iu-${wargaId}-2026-${bulan}`,
+      kelurahanId: 'kel-1',
+      rtId: 'rt-1',
+      wargaTerdataId: wargaId,
+      tahun: 2026,
+      bulan,
+      tanggalBayar: tgl,
+      nominal: 15_000,
+      dicatatOleh: 'Bendahara RT',
+      createdAt: `${tgl}T10:00:00`,
+    });
+  };
+
+  for (let n = 1; n <= 67; n++) {
+    const id = `wt-kk-${n}`;
+    const hari = hariBayar[n % hariBayar.length];
+    // Pola mirip foto: mayoritas lunas s/d Okt; sebagian tunggak; Hanum mulai Mar; Okta jarang
+    let sampai = 10; // Okt
+    let dari = 1;
+    if (n === 11) {
+      // Herlan — di Excel lunas Jan–Agu
+      sampai = 8;
+    } else if (n === 40) {
+      // Latifah / A. Latif — di Excel kosong; demo sedikit bayar
+      sampai = 3;
+    } else if (n === 55) {
+      // Tanti — Jan–Sep + Nov
+      sampai = 9;
+    } else if (n === 60) {
+      // Okta — sering tunggak (merah di Excel)
+      sampai = 4;
+    } else if (n === 63) {
+      // Hanum — Jan–Feb kosong (kuning di Excel)
+      dari = 3;
+      sampai = 8;
+    } else if (n === 64) {
+      // Eka Besi — mulai Juli
+      dari = 7;
+      sampai = 10;
+    } else if (n % 11 === 0) {
+      sampai = 6;
+    } else if (n % 9 === 0) {
+      sampai = 8;
+    } else if (n % 7 === 0) {
+      sampai = 9;
+    } else if (n <= 8 || n % 5 === 1) {
+      sampai = 11; // sampai Nov
+    }
+    for (let b = dari; b <= sampai; b++) {
+      push(id, b, b === 2 ? Math.min(hari, 28) : hari);
+    }
+    if (n === 55) push(id, 11, 24); // Tanti Nov
+  }
+  return rows;
+}
+
+/**
+ * Buku kas harian RT 001/07 — nominal meniru Excel bendahara (foto WA).
+ * Cuplikan Mar–Nov 2026 agar saldo & iuran terlihat “hidup”.
+ */
+function seedKasTransaksiRt07(): KasTransaksiRt[] {
+  const bendahara = 'Bendahara RT';
+  const row = (
+    id: string,
+    tanggal: string,
+    uraian: string,
+    kategori: KasTransaksiRt['kategori'],
+    debet: number,
+    kredit: number,
+  ): KasTransaksiRt => ({
+    id,
+    kelurahanId: 'kel-1',
+    rtId: 'rt-1',
+    tanggal,
+    uraian,
+    kategori,
+    debet,
+    kredit,
+    dicatatOleh: bendahara,
+    createdAt: `${tanggal}T12:00:00`,
+  });
+  return [
+    // Saldo awal diset agar saldo akhir = Rp8.546.000 (sama Excel bendahara foto WA)
+    row('kas-0', '2026-01-05', 'Saldo awal kas RT 001/07 (sesuai buku kas)', 'LAINNYA', 6_227_000, 0),
+    row('kas-1', '2026-03-12', 'Iuran Kas Attaawun Sampah warga bulan Maret 2026', 'IURAN_WARGA', 903_000, 0),
+    row('kas-2', '2026-03-15', 'Bayar ataawun dan Kas RW Bulan Maret 2026', 'SETOR_RW', 0, 200_000),
+    row('kas-3', '2026-03-18', 'Bayar Sampah LH Maret 2026', 'SAMPAH', 0, 400_000),
+    row('kas-4', '2026-03-22', 'Terima iuran sampah PT Javan', 'DONASI', 150_000, 0),
+    row('kas-5', '2026-04-10', 'Terima iuran sampah PT Katalog', 'DONASI', 90_000, 0),
+    row('kas-6', '2026-04-20', 'Dana Bantuan warga sakit (Rita Wulandari)', 'BANTUAN_SAKIT', 0, 150_000),
+    row('kas-7', '2026-05-08', 'Iuran Kas Attaawun Sampah warga bulan Mei 2026', 'IURAN_WARGA', 1_351_000, 0),
+    row('kas-8', '2026-05-12', 'Bayar ataawun dan Kas RW Bulan Mei 2026', 'SETOR_RW', 0, 200_000),
+    row('kas-9', '2026-05-14', 'Bayar Sampah LH Mei 2026', 'SAMPAH', 0, 400_000),
+    row('kas-10', '2026-05-20', 'Sosialisasi Pemilahan Sampah', 'OPERASIONAL', 0, 970_000),
+    row('kas-11', '2026-05-25', 'Terima iuran sampah PT Garis Pratama Solusi', 'DONASI', 200_000, 0),
+    row('kas-12', '2026-06-08', 'Iuran Kas Attaawun Sampah warga bulan Juni 2026', 'IURAN_WARGA', 1_028_000, 0),
+    row('kas-13', '2026-06-10', 'Bayar ataawun dan Kas RW Bulan Juni 2026', 'SETOR_RW', 0, 200_000),
+    row('kas-14', '2026-06-12', 'Bayar Sampah LH Juni 2026', 'SAMPAH', 0, 400_000),
+    row('kas-15', '2026-06-18', 'Biaya perbaikan saluran air', 'OPERASIONAL', 0, 200_000),
+    row('kas-16', '2026-06-22', 'Dana Bantuan warga sakit (Ujang Hermawan)', 'BANTUAN_SAKIT', 0, 150_000),
+    row('kas-17', '2026-07-08', 'Iuran Kas Attaawun Sampah warga bulan Juli 2026', 'IURAN_WARGA', 730_000, 0),
+    row('kas-18', '2026-07-10', 'Bayar ataawun dan Kas RW Bulan Juli 2026', 'SETOR_RW', 0, 200_000),
+    row('kas-19', '2026-07-12', 'Bayar Sampah LH Juli 2026', 'SAMPAH', 0, 400_000),
+    row('kas-20', '2026-07-20', 'Dana Bantuan warga sakit (Mardiyanto)', 'BANTUAN_SAKIT', 0, 150_000),
+    row('kas-21', '2026-07-25', 'Beli Bendera 17-an', 'OPERASIONAL', 0, 135_000),
+    row('kas-22', '2026-08-08', 'Iuran Kas Attaawun Sampah warga bulan Agustus 2026', 'IURAN_WARGA', 868_000, 0),
+    row('kas-23', '2026-08-10', 'Bayar ataawun dan Kas RW Bulan Agustus 2026', 'SETOR_RW', 0, 200_000),
+    row('kas-24', '2026-08-12', 'Bayar Sampah LH Agustus 2026', 'SAMPAH', 0, 400_000),
+    row('kas-25', '2026-08-18', 'Terima iuran sampah PT Bayu Sukses Pratama', 'DONASI', 150_000, 0),
+    row('kas-26', '2026-08-22', 'Pembelian ATK RT', 'OPERASIONAL', 0, 145_000),
+    row('kas-27', '2026-09-08', 'Iuran Kas Attaawun Sampah warga bulan September 2026', 'IURAN_WARGA', 765_000, 0),
+    row('kas-28', '2026-09-10', 'Bayar ataawun dan Kas RW Bulan September 2026', 'SETOR_RW', 0, 200_000),
+    row('kas-29', '2026-09-12', 'Dana Bantuan warga sakit (Ahmad Fauzi)', 'BANTUAN_SAKIT', 0, 150_000),
+    row('kas-30', '2026-09-20', 'Terima iuran sampah PT Mappi', 'DONASI', 90_000, 0),
+    row('kas-31', '2026-10-08', 'Iuran Kas Attaawun Sampah warga bulan Oktober 2026', 'IURAN_WARGA', 1_154_000, 0),
+    row('kas-32', '2026-10-10', 'Bayar ataawun dan Kas RW Bulan Oktober 2026', 'SETOR_RW', 0, 200_000),
+    row('kas-33', '2026-10-12', 'Bayar Sampah LH Oktober 2026', 'SAMPAH', 0, 400_000),
+    row('kas-34', '2026-10-18', 'Dana Bantuan warga sakit (Jelita Sari)', 'BANTUAN_SAKIT', 0, 150_000),
+    row('kas-35', '2026-10-22', 'Fotocopy Surat Pengantar / SK', 'OPERASIONAL', 0, 10_000),
+    row('kas-36', '2026-10-25', 'Terima iuran sampah PT Abadi Sinergi Jayasakti', 'DONASI', 120_000, 0),
+    row('kas-37', '2026-11-05', 'Iuran Kas Attaawun Sampah warga bulan November 2026', 'IURAN_WARGA', 980_000, 0),
+    row('kas-38', '2026-11-07', 'Bayar ataawun dan Kas RW Bulan November 2026', 'SETOR_RW', 0, 200_000),
+    row('kas-39', '2026-11-08', 'Pembelian Stempel RT 01/07', 'OPERASIONAL', 0, 50_000),
+  ];
+}
+
+/** Warga ringkas RT lain di RW 07 — untuk rekap jumlah KK Ketua RW (NIK masih dummy). */
+function seedWargaRingkasRw07Lain(): WargaTerdata[] {
+  const now = '2026-11-10T09:00:00';
+  const packs: Array<{ rtId: string; count: number; prefix: string }> = [
+    { rtId: 'rt-7-2', count: 54, prefix: '02' },
+    { rtId: 'rt-7-4', count: 48, prefix: '04' },
+    { rtId: 'rt-7-5', count: 61, prefix: '05' },
+    { rtId: 'rt-7-6', count: 42, prefix: '06' },
+  ];
+  const rows: WargaTerdata[] = [];
+  for (const p of packs) {
+    for (let i = 1; i <= p.count; i++) {
+      const nik = `317503${p.prefix}${String(1000 + i).slice(-4)}${String(i).padStart(4, '0')}`;
+      rows.push({
+        id: `wt-${p.rtId}-${i}`,
+        kelurahanId: 'kel-1',
+        rtId: p.rtId,
+        nama: `KK ${p.prefix}-${String(i).padStart(2, '0')}`,
+        nik,
+        noKk: nik,
+        jenisKelamin: i % 3 === 0 ? 'P' : 'L',
+        statusTinggal: 'TETAP',
+        alamat: `Wilayah RT ${p.prefix}/07 No. ${i}`,
+        hubunganKk: 'Kepala Keluarga',
+        statusVerifikasi: 'DITERIMA',
+        dicatatOleh: 'Ketua RT',
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
+  }
+  return rows;
+}
+
+/** Buku kas RW 07 — setoran RT + santunan / operasional RW. */
+function seedKasTransaksiRw07(): KasTransaksiRw[] {
+  const bendahara = 'Bendahara RW 07';
+  const row = (
+    id: string,
+    tanggal: string,
+    uraian: string,
+    kategori: KasTransaksiRw['kategori'],
+    debet: number,
+    kredit: number,
+    dariRtId?: string,
+  ): KasTransaksiRw => ({
+    id,
+    kelurahanId: 'kel-1',
+    rwId: 'rw-7',
+    dariRtId,
+    tanggal,
+    uraian,
+    kategori,
+    debet,
+    kredit,
+    dicatatOleh: bendahara,
+    createdAt: `${tanggal}T12:00:00`,
+  });
+  return [
+    row('kasrw-0', '2026-01-05', 'Saldo awal kas RW 07 tahun 2026', 'LAINNYA', 3_500_000, 0),
+    row('kasrw-1', '2026-08-12', 'Setoran taawun / kas RW dari RT 001', 'SETOR_RT', 200_000, 0, 'rt-1'),
+    row('kasrw-2', '2026-08-12', 'Setoran taawun / kas RW dari RT 002', 'SETOR_RT', 200_000, 0, 'rt-7-2'),
+    row('kasrw-3', '2026-08-13', 'Setoran taawun / kas RW dari RT 004', 'SETOR_RT', 200_000, 0, 'rt-7-4'),
+    row('kasrw-4', '2026-08-13', 'Setoran taawun / kas RW dari RT 005', 'SETOR_RT', 200_000, 0, 'rt-7-5'),
+    row('kasrw-5', '2026-08-14', 'Setoran taawun / kas RW dari RT 006', 'SETOR_RT', 200_000, 0, 'rt-7-6'),
+    row('kasrw-6', '2026-08-20', 'Santunan meninggal dunia (keluarga Bpk. Sutrisno — RT 002)', 'SANTUNAN_MENINGGAL', 0, 500_000),
+    row('kasrw-7', '2026-09-10', 'Setoran taawun / kas RW dari RT 001', 'SETOR_RT', 200_000, 0, 'rt-1'),
+    row('kasrw-8', '2026-09-10', 'Setoran taawun / kas RW dari RT 002', 'SETOR_RT', 200_000, 0, 'rt-7-2'),
+    row('kasrw-9', '2026-09-11', 'Setoran taawun / kas RW dari RT 004–006', 'SETOR_RT', 600_000, 0),
+    row('kasrw-10', '2026-09-18', 'Santunan meninggal dunia (Ibu Halimah — RT 005)', 'SANTUNAN_MENINGGAL', 0, 500_000),
+    row('kasrw-11', '2026-09-25', 'Konsumsi rapat koordinasi RT/RW', 'OPERASIONAL', 0, 250_000),
+    row('kasrw-12', '2026-10-10', 'Setoran taawun / kas RW dari seluruh RT', 'SETOR_RT', 1_000_000, 0),
+    row('kasrw-13', '2026-10-15', 'Bantuan warga sakit (RW)', 'BANTUAN_SAKIT', 0, 300_000),
+    row('kasrw-14', '2026-10-22', 'Donasi warga untuk kas RW', 'DONASI', 350_000, 0),
+    row('kasrw-15', '2026-11-07', 'Setoran taawun / kas RW dari RT 001', 'SETOR_RT', 200_000, 0, 'rt-1'),
+    row('kasrw-16', '2026-11-07', 'Setoran taawun / kas RW dari RT 002', 'SETOR_RT', 200_000, 0, 'rt-7-2'),
+    row('kasrw-17', '2026-11-08', 'Setoran taawun / kas RW dari RT 004', 'SETOR_RT', 200_000, 0, 'rt-7-4'),
+    row('kasrw-18', '2026-11-08', 'Setoran taawun / kas RW dari RT 005', 'SETOR_RT', 200_000, 0, 'rt-7-5'),
+    row('kasrw-19', '2026-11-08', 'Setoran taawun / kas RW dari RT 006', 'SETOR_RT', 200_000, 0, 'rt-7-6'),
+    row('kasrw-20', '2026-11-10', 'Santunan meninggal dunia (Bpk. Roidin — RT 001)', 'SANTUNAN_MENINGGAL', 0, 500_000),
+  ];
+}
+
+/** Matriks setoran RT → RW 07 (taawun Rp200.000/bulan) — mirip iuran warga di RT. */
+function seedSetoranRtKeRw07(): SetoranRtKeRw[] {
+  const rts = [
+    { id: 'rt-1', sampai: 10 },
+    { id: 'rt-7-2', sampai: 10 },
+    { id: 'rt-7-4', sampai: 9 },
+    { id: 'rt-7-5', sampai: 8 },
+    { id: 'rt-7-6', sampai: 7 },
+  ];
+  const rows: SetoranRtKeRw[] = [];
+  for (const rt of rts) {
+    for (let b = 1; b <= rt.sampai; b++) {
+      const tgl = `2026-${String(b).padStart(2, '0')}-10`;
+      rows.push({
+        id: `setor-${rt.id}-2026-${b}`,
+        kelurahanId: 'kel-1',
+        rwId: 'rw-7',
+        rtId: rt.id,
+        tahun: 2026,
+        bulan: b,
+        tanggalBayar: tgl,
+        nominal: 200_000,
+        dicatatOleh: 'Bendahara RW 07',
+        createdAt: `${tgl}T10:00:00`,
+      });
+    }
+  }
+  return rows;
+}
+
+function seedWargaPendatangRt07(): WargaPendatang[] {
+  return [
+    {
+      id: 'wp-1',
+      kelurahanId: 'kel-1',
+      rtId: 'rt-1',
+      rumahWargaId: 'rm-10',
+      namaPemilikKos: 'Ibu Ratna',
+      alamatKos: 'Jl. Rawajati Timur No. 28',
+      namaPenghuni: 'Andi Saputra',
+      nik: '3172011202000007',
+      tanggalLahir: '2000-12-12',
+      jenisKelamin: 'L',
+      asalDaerah: 'Tangerang',
+      tanggalMasuk: '2026-11-12',
+      fotoKtpName: 'KTP-Andi-pending.jpg',
+      statusVerifikasi: 'PENDING',
+      createdAt: '2026-11-13T10:00:00',
+    },
+    {
+      id: 'wp-2',
+      kelurahanId: 'kel-1',
+      rtId: 'rt-1',
+      rumahWargaId: 'rm-11',
+      namaPemilikKos: 'Pak Joko',
+      alamatKos: 'Jl. Binawarga No. 22',
+      namaPenghuni: 'Maya Sari',
+      nik: '3273016101980008',
+      tanggalLahir: '1998-01-21',
+      jenisKelamin: 'P',
+      asalDaerah: 'Bekasi',
+      tanggalMasuk: '2026-11-10',
+      fotoKtpName: 'KTP-Maya-pending.jpg',
+      statusVerifikasi: 'PENDING',
+      createdAt: '2026-11-11T14:30:00',
+    },
+  ];
+}
+
+/** 1 lembaga LMK kelurahan · 1 anggota per RW (Perda DKI). */
+function seedAnggotaLmk(rws: Rw[]): AnggotaLmk[] {
+  const names: Record<string, { nama: string; telepon: string }> = {
+    'rw-1': { nama: 'H. Slamet Riyadi', telepon: '0812-2001-0001' },
+    'rw-3': { nama: 'Ibu Kartini Dewi', telepon: '0812-2003-0001' },
+    'rw-7': { nama: 'Drs. Heru Wibowo', telepon: '0812-2007-0001' },
+    'rw-11': { nama: 'Hj. Sulastri', telepon: '0812-2011-0001' },
+  };
+  return rws.map((rw, i) => {
+    const n = names[rw.id] ?? { nama: `Tokoh ${rw.nomor}`, telepon: `0812-2099-00${rw.nomor}` };
+    return {
+      id: `lmk-${rw.id}`,
+      kelurahanId: 'kel-1',
+      rwId: rw.id,
+      nama: n.nama,
+      telepon: n.telepon,
+      nomorSk: `LMK/${rw.nomor}/RWJ/2024`,
+      isActive: true,
+      catatan: i === 0 ? 'Perwakilan tokoh masyarakat RW (bukan pengurus struktural)' : undefined,
+    };
+  });
+}
+
+function seedSuratMasuk(): SuratMasuk[] {
+  const today = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const ymd = (offset: number) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + offset);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  };
+  return [
+    {
+      id: 'sm-1',
+      kelurahanId: 'kel-1',
+      nomorAgenda: '001/SM/XI/2026',
+      nomorSuratAsal: '123/Camat/XI/2026',
+      asal: 'Kecamatan Pancoran',
+      perihal: 'Undangan rapat koordinasi kelurahan se-Kecamatan',
+      tanggalSurat: ymd(-1),
+      tanggalTerima: ymd(0),
+      status: 'BARU',
+      ringkasan: 'Rapat Senin depan di aula kecamatan; minta konfirmasi hadir Lurah/Sekkel.',
+      dicatatOleh: 'Maya Kartika',
+      createdAt: `${ymd(0)}T08:10:00`,
+      updatedAt: `${ymd(0)}T08:10:00`,
+    },
+    {
+      id: 'sm-2',
+      kelurahanId: 'kel-1',
+      nomorAgenda: '002/SM/XI/2026',
+      nomorSuratAsal: '45/Keswa/XI/2026',
+      asal: 'Suku Dinas Kesehatan Jakarta Selatan',
+      perihal: 'Imbauan intensifikasi PSN menjelang musim hujan',
+      tanggalSurat: ymd(-3),
+      tanggalTerima: ymd(-2),
+      status: 'DIDISPOSISI',
+      ringkasan: 'Minta laporan ABJ dan zona waspada.',
+      disposisiUserId: 'u-kasi-kesra',
+      disposisiLabel: 'Siti Marlina · Kasi Kesra',
+      catatanDisposisi: 'Siapkan rekap ABJ + daftar RT zona merah.',
+      didisposisiAt: `${ymd(-2)}T11:00:00`,
+      dicatatOleh: 'Maya Kartika',
+      createdAt: `${ymd(-2)}T09:00:00`,
+      updatedAt: `${ymd(-2)}T11:00:00`,
+    },
+    {
+      id: 'sm-3',
+      kelurahanId: 'kel-1',
+      nomorAgenda: '003/SM/XI/2026',
+      asal: 'Sudin Perumahan dan Permukiman',
+      perihal: 'Permintaan data saluran rawan genangan',
+      tanggalSurat: ymd(-10),
+      tanggalTerima: ymd(-9),
+      status: 'SELESAI',
+      disposisiUserId: 'u-kasi-ekbang',
+      disposisiLabel: 'Rudi Hartono · Kasi Ekbang',
+      catatanDisposisi: 'Koordinasi PPSU, kirim daftar ruas.',
+      catatanSelesai: 'Data ruas dikirim via email Dinas.',
+      didisposisiAt: `${ymd(-9)}T10:00:00`,
+      selesaiAt: `${ymd(-5)}T16:00:00`,
+      dicatatOleh: 'Maya Kartika',
+      createdAt: `${ymd(-9)}T08:30:00`,
+      updatedAt: `${ymd(-5)}T16:00:00`,
+    },
+  ];
+}
+
+function seedTamuDinas(): TamuDinas[] {
+  const today = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const ymd = (offset: number) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + offset);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  };
+  return [
+    {
+      id: 'td-1',
+      kelurahanId: 'kel-1',
+      namaTamu: 'Drs. Hendra Wijaya',
+      instansi: 'Kecamatan Pancoran',
+      jabatan: 'Kasubag Umum',
+      tujuan: 'KOORDINASI',
+      keperluan: 'Koordinasi persiapan rapat lurah se-kecamatan',
+      tanggal: ymd(0),
+      jamDatang: '09:15',
+      jamPulang: '10:05',
+      didampingiOleh: 'Sariman, S.Sos, M.Si',
+      didampingiUserId: 'u-admin',
+      dicatatOleh: 'Maya Kartika',
+      createdAt: `${ymd(0)}T09:20:00`,
+    },
+    {
+      id: 'td-2',
+      kelurahanId: 'kel-1',
+      namaTamu: 'dr. Ayu Lestari',
+      instansi: 'Puskesmas Kecamatan Pancoran',
+      jabatan: 'Koordinator Promkes',
+      tujuan: 'MONITORING',
+      keperluan: 'Pantauan PSN Jumantik & zona waspada DBD',
+      tanggal: ymd(-2),
+      jamDatang: '13:00',
+      jamPulang: '14:20',
+      didampingiOleh: 'Siti Marlina',
+      didampingiUserId: 'u-kasi-kesra',
+      catatan: 'Diminta update ABJ RW 07.',
+      dicatatOleh: 'Maya Kartika',
+      createdAt: `${ymd(-2)}T13:05:00`,
+    },
+    {
+      id: 'td-3',
+      kelurahanId: 'kel-1',
+      namaTamu: 'Ir. Bambang Prakoso',
+      instansi: 'Sudin SDA Jakarta Selatan',
+      tujuan: 'SOSIALISASI',
+      keperluan: 'Sosialisasi antisipasi genangan musim hujan',
+      tanggal: ymd(-5),
+      jamDatang: '10:00',
+      jamPulang: '11:30',
+      didampingiOleh: 'Rudi Hartono',
+      didampingiUserId: 'u-kasi-ekbang',
+      dicatatOleh: 'Maya Kartika',
+      createdAt: `${ymd(-5)}T10:10:00`,
+    },
+  ];
+}
+
+function seedEventBesar(): EventBesar[] {
+  const today = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const ymd = (offset: number) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + offset);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  };
+  const now = `${ymd(0)}T08:00:00`;
+  return [
+    {
+      id: 'ev-1',
+      kelurahanId: 'kel-1',
+      nama: 'Persiapan 17 Agustus (HUT RI)',
+      tanggal: '2026-08-17',
+      lokasi: 'Halaman & aula Kelurahan Rawajati',
+      status: 'PERSIAPAN',
+      deskripsi: 'Checklist lintas seksi: upacara, konsumsi, undangan RW, keamanan.',
+      dibuatOleh: 'Sariman, S.Sos, M.Si',
+      createdAt: now,
+      updatedAt: now,
+      checklist: [
+        {
+          id: 'ev1-c1',
+          judul: 'Susun panitia & pembagian tugas',
+          picNama: 'Maya Kartika',
+          picUserId: 'u-sekkel',
+          status: 'DONE',
+          tenggatAt: ymd(-20),
+          selesaiAt: `${ymd(-22)}T10:00:00`,
+        },
+        {
+          id: 'ev1-c2',
+          judul: 'Undang Ketua RW + konfirmasi hadir',
+          picNama: 'Maya Kartika',
+          picUserId: 'u-sekkel',
+          status: 'PROGRESS',
+          tenggatAt: ymd(14),
+        },
+        {
+          id: 'ev1-c3',
+          judul: 'Siapkan konsumsi & tenda',
+          picNama: 'Rudi Hartono',
+          picUserId: 'u-kasi-ekbang',
+          status: 'TODO',
+          tenggatAt: ymd(30),
+        },
+        {
+          id: 'ev1-c4',
+          judul: 'Koordinasi keamanan & parkir',
+          picNama: 'Bambang Sutrisno',
+          picUserId: 'u-ppsu-koord',
+          status: 'TODO',
+          tenggatAt: ymd(25),
+        },
+      ],
+    },
+    {
+      id: 'ev-2',
+      kelurahanId: 'kel-1',
+      nama: 'Kegiatan Ramadan — buka puasa bersama',
+      tanggal: '2026-03-20',
+      lokasi: 'Aula Lt. 2 Kelurahan Rawajati',
+      status: 'SELESAI',
+      deskripsi: 'Buka puasa lintas RW + PKK.',
+      dibuatOleh: 'Siti Marlina',
+      createdAt: '2026-03-01T09:00:00',
+      updatedAt: '2026-03-20T20:00:00',
+      checklist: [
+        {
+          id: 'ev2-c1',
+          judul: 'Daftar undangan RW/PKK',
+          picNama: 'Siti Marlina',
+          picUserId: 'u-kasi-kesra',
+          status: 'DONE',
+          selesaiAt: '2026-03-10T12:00:00',
+        },
+        {
+          id: 'ev2-c2',
+          judul: 'Konsumsi & sound system',
+          picNama: 'Rudi Hartono',
+          picUserId: 'u-kasi-ekbang',
+          status: 'DONE',
+          selesaiAt: '2026-03-18T15:00:00',
+        },
+      ],
+    },
+  ];
+}
+
+function seedPengaduan(rts: Rt[], rws: Rw[]): PengaduanWilayah[] {
+  const rw7 = rws.find((r) => r.id === 'rw-7')!;
+  const rw1 = rws.find((r) => r.id === 'rw-1') ?? rws[0];
+  const rt1 = rts.find((r) => r.id === 'rt-1') ?? rts[0];
+  const today = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const ymd = (offset: number) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + offset);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  };
+
+  return [
+    {
+      id: 'pg-1',
+      kelurahanId: 'kel-1',
+      judul: 'Genangan air di depan No. 12 Rawajati Timur',
+      isi: 'Setelah hujan, air menggenang ±30 menit. Warga khawatir saluran tersumbat.',
+      kategori: 'SALURAN',
+      prioritas: 'URGENT',
+      status: 'BARU',
+      lokasi: 'Jl. Rawajati Timur No. 12',
+      rwId: rw7.id,
+      rtId: rt1.id,
+      pelaporNama: rw7.namaKetua,
+      pelaporUserId: 'u-rw',
+      createdAt: `${ymd(0)}T07:40:00`,
+      updatedAt: `${ymd(0)}T07:40:00`,
+    },
+    {
+      id: 'pg-2',
+      kelurahanId: 'kel-1',
+      judul: 'Lampu PJU mati ruas Binawarga',
+      isi: '2 titik lampu mati sejak 3 malam. Diminta diperiksa Dinas / PPSU.',
+      kategori: 'PENERANGAN',
+      prioritas: 'NORMAL',
+      status: 'DIDISPOSISI',
+      lokasi: 'Jl. Binawarga (dekat RW 01)',
+      rwId: rw1.id,
+      pelaporNama: rw1.namaKetua,
+      disposisiJenis: 'STAF',
+      disposisiUserId: 'u-kasi-ekbang',
+      disposisiLabel: 'Rudi Hartono · Kasi Ekbang',
+      catatanDisposisi: 'Koordinasikan dengan PPSU & catat titik GPS.',
+      didisposisiAt: `${ymd(-1)}T10:00:00`,
+      createdAt: `${ymd(-2)}T16:20:00`,
+      updatedAt: `${ymd(-1)}T10:00:00`,
+    },
+    {
+      id: 'pg-3',
+      kelurahanId: 'kel-1',
+      judul: 'Tumpukan sampah liar dekat fasum',
+      isi: 'Ada tumpukan setelah pasar pagi. Mohon diangkut / diingatkan warga.',
+      kategori: 'KEBERSIHAN',
+      prioritas: 'NORMAL',
+      status: 'DIPROSES',
+      lokasi: 'Area fasum RW 07',
+      rwId: rw7.id,
+      rtId: rt1.id,
+      pelaporNama: rw7.namaKetua,
+      pelaporUserId: 'u-rw',
+      disposisiJenis: 'PPSU',
+      disposisiUserId: 'u-ppsu-koord',
+      disposisiLabel: 'Bambang Sutrisno · Koordinator PPSU',
+      catatanDisposisi: 'Jadwalkan angkut + edukasi singkat.',
+      didisposisiAt: `${ymd(-3)}T09:00:00`,
+      diprosesAt: `${ymd(-2)}T08:30:00`,
+      createdAt: `${ymd(-4)}T11:00:00`,
+      updatedAt: `${ymd(-2)}T08:30:00`,
+    },
+    {
+      id: 'pg-4',
+      kelurahanId: 'kel-1',
+      judul: 'Permintaan surat pengantar usaha (follow-up)',
+      isi: 'Warga sudah ke loket; diminta konfirmasi kelengkapan berkas ke RW.',
+      kategori: 'ADMINISTRASI',
+      prioritas: 'NORMAL',
+      status: 'SELESAI',
+      rwId: rw7.id,
+      pelaporNama: rw7.namaKetua,
+      pelaporUserId: 'u-rw',
+      disposisiJenis: 'STAF',
+      disposisiUserId: 'u-sekkel',
+      disposisiLabel: 'Maya Kartika · Sekkel',
+      catatanDisposisi: 'Cek berkas & hubungi warga.',
+      catatanSelesai: 'Berkas lengkap; warga diarahkan ke loket lagi.',
+      didisposisiAt: `${ymd(-8)}T09:00:00`,
+      diprosesAt: `${ymd(-7)}T13:00:00`,
+      selesaiAt: `${ymd(-6)}T15:00:00`,
+      createdAt: `${ymd(-9)}T10:00:00`,
+      updatedAt: `${ymd(-6)}T15:00:00`,
+    },
+  ];
 }
 
 function seedPerintahLurah(rws: Rw[]): PerintahLurah[] {
@@ -1332,6 +2270,7 @@ function seedSuratKeluar(): SuratKeluar[] {
       tanggalSurat: '2026-11-12',
       dibuatOleh: 'Maya Kartika',
       catatan: 'Disampaikan via WA + PDF',
+      penerimaJenis: ['RW', 'RT', 'LMK'],
       createdAt: '2026-11-12T08:30:00',
     },
     {
@@ -1346,6 +2285,36 @@ function seedSuratKeluar(): SuratKeluar[] {
       tanggalSurat: '2026-11-13',
       dibuatOleh: 'Maya Kartika',
       createdAt: '2026-11-13T09:00:00',
+    },
+    {
+      id: 'sk-2b',
+      kelurahanId: 'kel-1',
+      nomorSurat: '009/UND/RWJ/XI/2026',
+      nomorUrut: 9,
+      tahun: 2026,
+      kode: 'UND',
+      perihal: 'Undangan kerja bakti gabungan wilayah RW 07',
+      tujuan: 'Ketua RW 07 · Ketua RT 001–006 · LMK',
+      tanggalSurat: '2026-11-14',
+      dibuatOleh: 'Maya Kartika',
+      catatan: 'Dari Lurah/Sekkel: RW+RT di portal; LMK WA langsung dari kelurahan',
+      penerimaJenis: ['RW', 'RT', 'LMK'],
+      createdAt: '2026-11-14T09:00:00',
+    },
+    {
+      id: 'sk-2c',
+      kelurahanId: 'kel-1',
+      nomorSurat: '010/UND/RWJ/XI/2026',
+      nomorUrut: 10,
+      tahun: 2026,
+      kode: 'UND',
+      perihal: 'Rapat koordinasi keamanan & kebersihan RW 07',
+      tujuan: 'Ketua RW 07 dan jajaran RT',
+      tanggalSurat: '2026-11-10',
+      dibuatOleh: 'Maya Kartika',
+      catatan: 'Dari kelurahan → inbox RW & Ketua RT',
+      penerimaJenis: ['RW', 'RT'],
+      createdAt: '2026-11-10T10:00:00',
     },
     {
       id: 'sk-3',
@@ -1424,16 +2393,18 @@ function seedAgendaRapat(rts: Rt[], rws: Rw[]): AgendaRapat[] {
           id: 'ag-1-lmk-1',
           jenis: 'LMK',
           nama: 'H. Slamet Riyadi',
-          instansi: 'Ketua LMK Rawajati',
+          instansi: 'Perwakilan LMK · RW 01',
+          rwId: 'rw-1',
           telepon: '0812-2001-0001',
           hadir: false,
         },
         {
           id: 'ag-1-lmk-2',
           jenis: 'LMK',
-          nama: 'Ibu Kartini',
-          instansi: 'Sekretaris LMK',
-          telepon: '0812-2001-0002',
+          nama: 'Drs. Heru Wibowo',
+          instansi: 'Perwakilan LMK · RW 07',
+          rwId: 'rw-7',
+          telepon: '0812-2007-0001',
           hadir: false,
         },
       ],

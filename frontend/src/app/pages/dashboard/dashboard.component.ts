@@ -84,6 +84,17 @@ import { DataService } from '../../core/data.service';
         </section>
 
         <section class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <a routerLink="/app/radar" class="btn-primary text-center text-sm">Radar Mingguan Lurah</a>
+          <a routerLink="/app/data-warga" class="btn-secondary text-center text-sm">Data Warga RT</a>
+          <a routerLink="/app/laporan-lurah" class="btn-secondary text-center text-sm">Laporan Lurah PDF</a>
+          <a routerLink="/app/pengaduan" class="btn-secondary text-center text-sm"
+            >Aduan RW ({{ data.pengaduanTerbukaCount() }})</a
+          >
+          <a routerLink="/app/surat-masuk" class="btn-secondary text-center text-sm"
+            >Surat Masuk Dinas ({{ data.suratMasukTerbukaCount() }})</a
+          >
+          <a routerLink="/app/tamu-dinas" class="btn-secondary text-center text-sm">Buku Tamu Dinas</a>
+          <a routerLink="/app/event-besar" class="btn-secondary text-center text-sm">Checklist Event</a>
           <a routerLink="/app/kalender" class="btn-secondary text-center text-sm">Kalender Operasional</a>
           <a routerLink="/app/perintah" class="btn-secondary text-center text-sm"
             >Perintah ({{ data.perintahAktifCount() }} aktif)</a
@@ -201,7 +212,7 @@ import { DataService } from '../../core/data.service';
               class="mt-2 text-4xl font-extrabold tracking-tight"
               [class]="data.daopBelumSetorCount() ? 'text-amber-600' : 'text-emerald-600'"
             >
-              {{ ringkasDaopRt().belum }} 
+              {{ ringkasDaopRt().belum }}
               <span class="text-lg font-bold text-slate-400">nunggak</span>
             </p>
             <p class="mt-3 text-sm text-slate-500">
@@ -211,18 +222,37 @@ import { DataService } from '../../core/data.service';
           <article class="card">
             <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Tugas portal ini</p>
             <ul class="mt-3 space-y-2 text-sm text-slate-700">
-              <li>· Cetak form DAOP bulanan RT</li>
-              <li>· TTD basah, lalu upload scan dari HP</li>
-              <li>· Pantau status setor / nunggak</li>
+              <li>· Data warga (NIK/KK) + surat SK/SKD/kematian</li>
+              <li>· Kas RT: iuran bulanan + buku kas + share warga</li>
+              <li>· Setor DAOP bulanan</li>
             </ul>
           </article>
         </section>
-        <section>
-          <a routerLink="/app/daop" class="btn-primary inline-flex text-base">Buka Laporan DAOP RT →</a>
+        <section class="flex flex-wrap gap-3">
+          <a routerLink="/app/data-warga" class="btn-primary inline-flex text-base">Data Warga →</a>
+          <a routerLink="/app/kas-rt" class="btn-secondary inline-flex text-base">Kas RT →</a>
+          <a routerLink="/app/surat-keterangan" class="btn-secondary inline-flex text-base">Surat →</a>
+          <a routerLink="/app/daop" class="btn-secondary inline-flex text-base">DAOP →</a>
         </section>
       }
 
-      @if (!auth.hasRole('ADMIN_KEL') && !auth.hasRole('PETUGAS_PPSU') && !auth.isKetuaRt()) {
+      @if (auth.isDasawisma()) {
+        <section class="card !p-5">
+          <h2 class="text-lg font-bold text-slate-900">Portal Dasawisma / PKK</h2>
+          <p class="mt-2 text-sm text-slate-600">
+            Bantu Ketua RT mengisi buku warga digital — warga tetap maupun kos. Verifikasi akhir tetap di
+            Ketua RT.
+          </p>
+          <a routerLink="/app/data-warga" class="btn-primary mt-4 inline-flex">Buka Data Warga →</a>
+        </section>
+      }
+
+      @if (
+        !auth.hasRole('ADMIN_KEL') &&
+        !auth.hasRole('PETUGAS_PPSU') &&
+        !auth.isKetuaRt() &&
+        !auth.isDasawisma()
+      ) {
         <section
           class="grid gap-4"
           [class.sm:grid-cols-2]="true"
@@ -332,10 +362,11 @@ import { DataService } from '../../core/data.service';
         }
 
         @if (auth.hasRole('KOORD_RW')) {
-          <section class="grid gap-3 sm:grid-cols-3">
-            <a routerLink="/app/psn" class="btn-secondary text-center text-sm">Lihat Laporan PSN</a>
+          <section class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <a routerLink="/app/rekap-warga-rw" class="btn-primary text-center text-sm">Rekap Warga RW</a>
+            <a routerLink="/app/kas-rw" class="btn-secondary text-center text-sm">Kas RW</a>
             <a routerLink="/app/daop" class="btn-secondary text-center text-sm">Laporan DAOP</a>
-            <a routerLink="/app/laporan" class="btn-secondary text-center text-sm">Export Laporan</a>
+            <a routerLink="/app/psn" class="btn-secondary text-center text-sm">Laporan PSN</a>
           </section>
         }
 

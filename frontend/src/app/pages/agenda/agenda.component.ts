@@ -115,6 +115,9 @@ type TabAgenda = 'RAPAT' | 'KERJA_BAKTI';
                   <button type="button" class="btn-secondary text-xs" (click)="tambahSemuaRt()">
                     + Semua Ketua RT
                   </button>
+                  <button type="button" class="btn-secondary text-xs" (click)="tambahSemuaLmk()">
+                    + Semua perwakilan LMK
+                  </button>
                 </div>
               </div>
               <div class="mt-3 grid gap-2 sm:grid-cols-3">
@@ -124,7 +127,7 @@ type TabAgenda = 'RAPAT' | 'KERJA_BAKTI';
                     <option value="STAF">Staf kelurahan (internal)</option>
                     <option value="RW">Ketua RW</option>
                     <option value="RT">Ketua RT</option>
-                    <option value="LMK">Pengurus LMK</option>
+                    <option value="LMK">Perwakilan LMK (1 orang / RW)</option>
                     <option value="TAMU">Tamu luar</option>
                   </select>
                 </div>
@@ -151,27 +154,17 @@ type TabAgenda = 'RAPAT' | 'KERJA_BAKTI';
                   </div>
                 }
                 @if (draftPeserta.jenis === 'LMK') {
-                  <div>
-                    <label class="field-label" for="nama-lmk">Nama pengurus LMK</label>
-                    <input id="nama-lmk" class="field-input" [(ngModel)]="draftPeserta.nama" placeholder="Nama" />
-                  </div>
-                  <div>
-                    <label class="field-label" for="jabatan-lmk">Jabatan di LMK</label>
-                    <input
-                      id="jabatan-lmk"
-                      class="field-input"
-                      [(ngModel)]="draftPeserta.instansi"
-                      placeholder="Ketua / Sekretaris / Bendahara…"
-                    />
-                  </div>
-                  <div>
-                    <label class="field-label" for="wa-lmk">No. WA (untuk blast)</label>
-                    <input
-                      id="wa-lmk"
-                      class="field-input"
-                      [(ngModel)]="draftPeserta.telepon"
-                      placeholder="08…"
-                    />
+                  <div class="sm:col-span-2">
+                    <label class="field-label" for="pilih-lmk">Pilih perwakilan LMK (dari Master)</label>
+                    <select id="pilih-lmk" class="field-input" [(ngModel)]="draftPeserta.lmkId">
+                      <option value="">— 1 tokoh per RW —</option>
+                      @for (a of data.anggotaLmksSorted(); track a.id) {
+                        <option [value]="a.id">{{ data.labelAnggotaLmk(a) }}</option>
+                      }
+                    </select>
+                    <p class="mt-1 text-[11px] text-slate-500">
+                      LMK = satu lembaga di kelurahan; anggota = perwakilan tiap RW (bukan Ketua/Sekretaris LMK).
+                    </p>
                   </div>
                 }
                 @if (draftPeserta.jenis === 'STAF') {
@@ -792,7 +785,8 @@ export class AgendaComponent {
     rwId: string;
     rtId: string;
     userId: string;
-  } = { jenis: 'STAF', nama: '', instansi: '', telepon: '', rwId: '', rtId: '', userId: '' };
+    lmkId: string;
+  } = { jenis: 'STAF', nama: '', instansi: '', telepon: '', rwId: '', rtId: '', userId: '', lmkId: '' };
 
   formKb = {
     rwId: '',
@@ -834,7 +828,7 @@ export class AgendaComponent {
       RW: 'Ketua RW',
       STAF: 'Staf',
       TAMU: 'Tamu',
-      LMK: 'LMK',
+      LMK: 'Perwakilan LMK',
     };
     return map[j];
   }
@@ -982,12 +976,32 @@ export class AgendaComponent {
       d.rtId = '';
       return;
     }
-    if (!d.nama.trim()) {
-      this.data.showToast('Nama wajib diisi.');
+    if (d.jenis === 'LMK') {
+      const a = this.data.anggotaLmks().find((x) => x.id === d.lmkId);
+      if (!a) {
+        this.data.showToast('Pilih perwakilan LMK dulu (Master Data).');
+        return;
+      }
+      if (this.formPeserta().some((p) => p.jenis === 'LMK' && p.rwId === a.rwId)) {
+        this.data.showToast('Perwakilan LMK RW itu sudah di undangan.');
+        return;
+      }
+      const rw = this.data.getRw(a.rwId);
+      this.formPeserta.update((list) => [
+        ...list,
+        {
+          jenis: 'LMK',
+          nama: a.nama,
+          rwId: a.rwId,
+          instansi: `Perwakilan LMK · ${rw ? this.data.labelRw(rw.nomor) : 'RW'}`,
+          telepon: a.telepon,
+        },
+      ]);
+      d.lmkId = '';
       return;
     }
-    if (d.jenis === 'LMK' && !d.telepon.replace(/\D/g, '')) {
-      this.data.showToast('Isi No. WA pengurus LMK agar bisa di-blast.');
+    if (!d.nama.trim()) {
+      this.data.showToast('Nama wajib diisi.');
       return;
     }
     this.formPeserta.update((list) => [
@@ -1002,6 +1016,33 @@ export class AgendaComponent {
     d.nama = '';
     d.instansi = '';
     d.telepon = '';
+  }
+
+  tambahSemuaLmk(): void {
+    const existing = new Set(
+      this.formPeserta()
+        .filter((p) => p.jenis === 'LMK')
+        .map((p) => p.rwId)
+        .filter(Boolean),
+    );
+    const add = this.data
+      .anggotaLmksSorted()
+      .filter((a) => a.isActive && !existing.has(a.rwId))
+      .map((a) => {
+        const rw = this.data.getRw(a.rwId);
+        return {
+          jenis: 'LMK' as const,
+          nama: a.nama,
+          rwId: a.rwId,
+          instansi: `Perwakilan LMK · ${rw ? this.data.labelRw(rw.nomor) : 'RW'}`,
+          telepon: a.telepon,
+        };
+      });
+    if (!add.length) {
+      this.data.showToast('Semua perwakilan LMK sudah di undangan.');
+      return;
+    }
+    this.formPeserta.update((list) => [...list, ...add]);
   }
 
   hapusDraftPeserta(index: number): void {

@@ -128,12 +128,53 @@ export class ShellComponent {
 
   private readonly nav: NavItem[] = [
     { label: 'Beranda', path: '/app/dashboard', icon: '▣', roles: ['ADMIN_KEL', 'KOORD_RW', 'OP_RT'] },
+    {
+      label: 'Data Warga RT',
+      path: '/app/data-warga',
+      icon: '⌂',
+      roles: ['ADMIN_KEL', 'OP_RT'],
+    },
+    {
+      label: 'Rekap Warga RW',
+      path: '/app/rekap-warga-rw',
+      icon: '⌂',
+      roles: ['ADMIN_KEL', 'KOORD_RW'],
+    },
+    {
+      label: 'Surat Keterangan',
+      path: '/app/surat-keterangan',
+      icon: '✉',
+      roles: ['ADMIN_KEL', 'OP_RT'],
+    },
+    {
+      label: 'Surat Kelurahan',
+      path: '/app/surat-kelurahan-rw',
+      icon: '✉',
+      roles: ['ADMIN_KEL', 'KOORD_RW', 'OP_RT'],
+    },
+    {
+      label: 'Kas RT',
+      path: '/app/kas-rt',
+      icon: 'Rp',
+      roles: ['ADMIN_KEL', 'OP_RT'],
+    },
+    {
+      label: 'Kas RW',
+      path: '/app/kas-rw',
+      icon: 'Rp',
+      roles: ['ADMIN_KEL', 'KOORD_RW'],
+    },
+    { label: 'Radar Mingguan', path: '/app/radar', icon: '◎', roles: ['ADMIN_KEL'] },
     { label: 'Kalender Operasional', path: '/app/kalender', icon: '📅', roles: ['ADMIN_KEL', 'KOORD_RW'] },
     { label: 'Perintah & Tindak Lanjut', path: '/app/perintah', icon: '⚡', roles: ['ADMIN_KEL', 'KOORD_RW', 'PETUGAS_PPSU'] },
-    { label: 'Master Data', path: '/app/master', icon: '⚙', roles: ['ADMIN_KEL', 'PETUGAS_PPSU'] },
+    { label: 'Aduan RW / Lapangan', path: '/app/pengaduan', icon: '⚑', roles: ['ADMIN_KEL', 'KOORD_RW', 'PETUGAS_PPSU'] },
     { label: 'Agenda Kelurahan', path: '/app/agenda', icon: '🗓', roles: ['ADMIN_KEL', 'KOORD_RW'] },
+    { label: 'Surat Masuk Dinas', path: '/app/surat-masuk', icon: '📥', roles: ['ADMIN_KEL'] },
     { label: 'Surat Keluar', path: '/app/surat-keluar', icon: '✉', roles: ['ADMIN_KEL'] },
+    { label: 'Buku Tamu Dinas', path: '/app/tamu-dinas', icon: '👤', roles: ['ADMIN_KEL'] },
+    { label: 'Checklist Event', path: '/app/event-besar', icon: '☑', roles: ['ADMIN_KEL'] },
     { label: 'Pantauan PPSU (Ekbang)', path: '/app/ekbang', icon: '🛠', roles: ['ADMIN_KEL'] },
+    { label: 'Master Data', path: '/app/master', icon: '⚙', roles: ['ADMIN_KEL', 'PETUGAS_PPSU'] },
     /** Hanya kader Jumantik — bukan Ketua RT */
     { label: 'Input Jumat Pagi', path: '/app/psn/input', icon: '✚', roles: ['OP_RT'] },
     /** Admin/RW; Jumantik ditambahkan lewat filter. Ketua RT TIDAK. */
@@ -161,10 +202,28 @@ export class ShellComponent {
     const jumantik = this.auth.isKaderJumantikUser();
     const ketuaRt = this.auth.isKetuaRtUser();
 
+    const dasawisma = this.auth.isDasawismaUser();
+
     return this.nav.filter((n) => {
-      // Ketua RT: hanya Beranda + DAOP
+      // Ketua RT: Beranda + Data Warga + SK + Surat Kelurahan + Kas + DAOP
       if (ketuaRt) {
-        return n.path === '/app/dashboard' || n.path === '/app/daop';
+        return (
+          n.path === '/app/dashboard' ||
+          n.path === '/app/data-warga' ||
+          n.path === '/app/surat-keterangan' ||
+          n.path === '/app/surat-kelurahan-rw' ||
+          n.path === '/app/kas-rt' ||
+          n.path === '/app/daop'
+        );
+      }
+
+      // Dasawisma / PKK: Beranda + Data Warga (+ lihat SK, isi data)
+      if (dasawisma) {
+        return (
+          n.path === '/app/dashboard' ||
+          n.path === '/app/data-warga' ||
+          n.path === '/app/surat-keterangan'
+        );
       }
 
       // Kader Jumantik: Beranda + Input Jumat + Laporan PSN
@@ -177,6 +236,23 @@ export class ShellComponent {
       }
 
       if (!n.roles.includes(role)) return false;
+
+      // Data warga / SK: jangan tampil ke Jumantik (sudah difilter di atas)
+      if (n.path === '/app/data-warga') {
+        return this.auth.canAccessDataWarga();
+      }
+      if (n.path === '/app/surat-keterangan') {
+        return this.auth.canAccessSuratKeterangan();
+      }
+      if (n.path === '/app/surat-kelurahan-rw') {
+        return this.auth.canAccessSuratDariKelurahan();
+      }
+      if (n.path === '/app/kas-rt') {
+        return this.auth.canAccessKasRt();
+      }
+      if (n.path === '/app/kas-rw' || n.path === '/app/rekap-warga-rw') {
+        return this.auth.canAccessKasRw();
+      }
 
       // Input Jumat hanya Jumantik (sudah ditangani di atas)
       if (n.path === '/app/psn/input') return false;
@@ -205,7 +281,19 @@ export class ShellComponent {
       return { ...item, short };
     };
     if (this.auth.isKetuaRtUser()) {
-      return [byPath('/app/dashboard', 'Beranda'), byPath('/app/daop', 'DAOP')];
+      return [
+        byPath('/app/dashboard', 'Beranda'),
+        byPath('/app/data-warga', 'Warga'),
+        byPath('/app/surat-kelurahan-rw', 'Surat'),
+        byPath('/app/kas-rt', 'Kas'),
+      ];
+    }
+    if (this.auth.isDasawismaUser()) {
+      return [
+        byPath('/app/dashboard', 'Beranda'),
+        byPath('/app/data-warga', 'Warga'),
+        byPath('/app/surat-keterangan', 'SK'),
+      ];
     }
     if (this.auth.isKaderJumantikUser()) {
       return [
@@ -217,24 +305,28 @@ export class ShellComponent {
     const map: Record<UserRole, Array<NavItem & { short: string }>> = {
       ADMIN_KEL: [
         byPath('/app/dashboard', 'Beranda'),
-        byPath('/app/kalender', 'Kalender'),
+        byPath('/app/radar', 'Radar'),
         byPath('/app/perintah', 'Perintah'),
-        byPath('/app/laporan', 'Export'),
+        byPath('/app/kalender', 'Kalender'),
       ],
       KOORD_RW: [
         byPath('/app/dashboard', 'Beranda'),
-        byPath('/app/kalender', 'Kalender'),
-        byPath('/app/perintah', 'Perintah'),
-        byPath('/app/daop', 'DAOP'),
+        byPath('/app/rekap-warga-rw', 'Warga'),
+        byPath('/app/kas-rw', 'Kas RW'),
+        byPath('/app/surat-kelurahan-rw', 'Surat'),
       ],
       OP_RT: [byPath('/app/dashboard', 'Beranda'), byPath('/app/daop', 'DAOP')],
       PETUGAS_PPSU: this.auth.isKetuaBidangPpsu()
         ? [
             byPath('/app/ppsu', 'PPSU'),
+            byPath('/app/pengaduan', 'Aduan RW'),
             byPath('/app/perintah', 'Perintah'),
-            byPath('/app/laporan', 'Export'),
           ]
-        : [byPath('/app/ppsu', 'PPSU'), byPath('/app/perintah', 'Tugas')],
+        : [
+            byPath('/app/ppsu', 'PPSU'),
+            byPath('/app/pengaduan', 'Aduan RW'),
+            byPath('/app/perintah', 'Tugas'),
+          ],
     };
     return role ? map[role] : [];
   });

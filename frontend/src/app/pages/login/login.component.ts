@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 
-type LoginRole = 'RW' | 'RT' | 'JUMANTIK' | 'PPSU' | 'STAF';
+type LoginRole = 'RW' | 'RT' | 'DASAWISMA' | 'JUMANTIK' | 'PPSU' | 'STAF';
 
 interface RoleCard {
   id: LoginRole;
@@ -30,32 +30,32 @@ const ROLE_CARDS: RoleCard[] = [
     iconBg: 'bg-sky-100 text-sky-800',
     icon: 'RW',
     tugas: [
-      'Setor laporan DAOP tingkat RW (form + TTD)',
-      'Pantau setoran RT di wilayah sendiri',
-      'Terima blast WA pengingat dari kelurahan',
+      'Rekap warga per RT + Kas RW (setoran / santunan)',
+      'Surat dari kelurahan → share ke Ketua RT / grup BOD',
+      'DAOP tingkat RW + pantauan wilayah',
     ],
     demos: [
       {
         email: 'rw07@kelurahan.id',
-        label: 'Ketua RW 07 — Agus Salim',
+        label: 'Ketua RW 07 — Susilo',
         hint: 'rw07@kelurahan.id · rw123',
       },
     ],
     panelTitle: 'Portal Ketua RW',
-    panelBlurb: 'Kelola setoran keuangan RT/RW dan pantauan wilayah secara digital.',
+    panelBlurb: 'Kesimpulan warga & kas tiap RT — plus buku kas RW (bukan menu RT).',
   },
   {
     id: 'RT',
     title: 'Ketua RT',
-    subtitle: 'Setor DAOP digital RT',
+    subtitle: 'Data warga + DAOP digital',
     badge: 'RT',
     accent: 'border-amber-300 bg-amber-50 hover:border-amber-500',
     iconBg: 'bg-amber-100 text-amber-900',
     icon: 'Rp',
     tugas: [
-      'Isi & cetak form DAOP bulanan RT',
-      'Upload scan form bertanda tangan',
-      'Lihat status setor / nunggak RT sendiri',
+      'Data warga (NIK/KK) + surat SK/SKD/kematian',
+      'Surat undangan dari Lurah/Sekkel (langsung ke portal RT)',
+      'Kas RT + DAOP bulanan RT',
     ],
     demos: [
       {
@@ -65,7 +65,30 @@ const ROLE_CARDS: RoleCard[] = [
       },
     ],
     panelTitle: 'Portal Ketua RT',
-    panelBlurb: 'Fokus setoran DAOP RT — bukan input keliling rumah warga.',
+    panelBlurb: 'Digitalisasi kepengurusan RT: data warga + DAOP — tanpa tumpukan fotokopi.',
+  },
+  {
+    id: 'DASAWISMA',
+    title: 'Dasawisma / PKK',
+    subtitle: 'Bantu pendataan warga RT',
+    badge: 'PKK',
+    accent: 'border-rose-300 bg-rose-50 hover:border-rose-500',
+    iconBg: 'bg-rose-100 text-rose-800',
+    icon: 'PK',
+    tugas: [
+      'Catat warga tetap / kos ke buku digital RT',
+      'Bantu RT mengarsipkan data (bukan verifikasi akhir)',
+      'Cari data warga untuk keperluan lapangan',
+    ],
+    demos: [
+      {
+        email: 'dasawisma@kelurahan.id',
+        label: 'Dasawisma RT001/RW 07 — Ibu Sulastri',
+        hint: 'dasawisma@kelurahan.id · dasa123',
+      },
+    ],
+    panelTitle: 'Portal Dasawisma / PKK',
+    panelBlurb: 'Tim PKK bantu isi data; Ketua RT yang menyahkan / verifikasi kos.',
   },
   {
     id: 'JUMANTIK',
@@ -127,14 +150,14 @@ const ROLE_CARDS: RoleCard[] = [
     iconBg: 'bg-blue-100 text-blue-800',
     icon: 'SI',
     tugas: [
-      'Pantauan lintas modul (Kesra · Ekbang · DAOP)',
-      'Agenda rapat & kerja bakti (biasanya Sekkel yang buat)',
-      'Export laporan resmi & Master Data',
+      'Surat Keluar → sebar ke RW, Ketua RT, dan LMK',
+      'Agenda rapat & kerja bakti (biasanya Sekkel)',
+      'Pantauan lintas modul + export laporan resmi',
     ],
     demos: [
       {
         email: 'sekkel@kelurahan.id',
-        label: 'Sekkel — Maya Kartika (utama buat agenda)',
+        label: 'Sekkel — Maya Kartika (Surat Keluar + agenda)',
         hint: 'sekkel@kelurahan.id · sekkel123',
       },
       {
@@ -144,7 +167,7 @@ const ROLE_CARDS: RoleCard[] = [
       },
     ],
     panelTitle: 'Portal Staf Kelurahan',
-    panelBlurb: 'Ringkasan pantauan dan kendali operasional seluruh modul SI-RAWAJATI.',
+    panelBlurb: 'Lurah & Sekkel kirim undangan ke portal RW/RT dan WA langsung ke LMK.',
   },
 ];
 
@@ -153,60 +176,68 @@ const ROLE_CARDS: RoleCard[] = [
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="min-h-screen lg:grid lg:grid-cols-2">
+    <div class="min-h-screen lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
       <section
-        class="relative hidden overflow-hidden px-10 py-12 text-white lg:flex lg:flex-col lg:justify-between"
+        class="relative hidden min-h-screen overflow-hidden text-white lg:flex lg:flex-col"
         [class]="panelGradient()"
       >
-        <div class="pointer-events-none absolute -left-16 top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl"></div>
-        <div class="pointer-events-none absolute bottom-10 right-0 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
+        <div class="pointer-events-none absolute -left-20 top-16 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-8 right-0 h-80 w-80 rounded-full bg-white/10 blur-3xl"></div>
 
-        <div class="relative">
-          <div
-            class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wider backdrop-blur"
-          >
-            <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
-            SI-RAWAJATI · Rawajati
+        <div class="relative z-[1] flex flex-1 flex-col justify-center px-12 py-14 xl:px-16 xl:py-16">
+          <div class="max-w-lg">
+            <div
+              class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wider backdrop-blur"
+            >
+              <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+              Kelurahan Rawajati
+            </div>
+
+            <p class="mt-8 text-sm font-bold uppercase tracking-[0.22em] text-white/70">SI-RAWAJATI</p>
+            <h1 class="mt-3 text-4xl font-extrabold leading-[1.1] tracking-tight xl:text-5xl">
+              {{ activeCard()?.panelTitle || 'Satu sistem, banyak portal kerja' }}
+            </h1>
+            <p class="mt-4 max-w-md text-base leading-relaxed text-white/85 xl:text-lg">
+              {{
+                activeCard()?.panelBlurb ||
+                  'Pilih peran di kanan — RT, RW, Jumantik, PPSU, Dasawisma, dan staf kelurahan masuk ke tugas masing-masing.'
+              }}
+            </p>
+
+            @if (activeCard(); as card) {
+              <ul class="mt-8 space-y-2.5">
+                @for (t of card.tugas; track t) {
+                  <li class="flex gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    <span class="mt-0.5 font-bold text-emerald-200">✓</span>
+                    <span>{{ t }}</span>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <ul class="mt-8 space-y-2.5 text-sm text-white/90">
+                <li class="flex gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur">
+                  <span class="mt-0.5 font-bold text-emerald-200">1</span>
+                  <span>Data warga + kas RT digital (NIK/KK, lansia, janda, bansos)</span>
+                </li>
+                <li class="flex gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur">
+                  <span class="mt-0.5 font-bold text-emerald-200">2</span>
+                  <span>PSN Jumantik, DAOP, PPSU lapangan — pantauan Lurah</span>
+                </li>
+                <li class="flex gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur">
+                  <span class="mt-0.5 font-bold text-emerald-200">3</span>
+                  <span>Siap pitch: radar operasional kelurahan, bukan Excel berceceran</span>
+                </li>
+              </ul>
+            }
           </div>
-          <h1 class="mt-6 text-4xl font-extrabold leading-tight xl:text-5xl">
-            {{ activeCard()?.panelTitle || 'SI-RAWAJATI' }}
-          </h1>
-          <p class="mt-3 max-w-md text-lg text-white/85">
-            {{
-              activeCard()?.panelBlurb ||
-                'Pilih peran Anda — setiap petugas punya portal dan tugas yang berbeda.'
-            }}
-          </p>
         </div>
 
-        @if (activeCard(); as card) {
-          <ul class="relative mt-10 space-y-3">
-            @for (t of card.tugas; track t) {
-              <li class="flex gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                <span class="mt-0.5 font-bold text-emerald-200">✓</span>
-                <span>{{ t }}</span>
-              </li>
-            }
-          </ul>
-        } @else {
-          <div class="relative mt-10 grid grid-cols-2 gap-3">
-            <div class="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
-              <p class="text-2xl font-bold">4+</p>
-              <p class="mt-1 text-sm text-white/80">Portal peran berbeda</p>
-            </div>
-            <div class="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
-              <p class="text-2xl font-bold">PSN</p>
-              <p class="mt-1 text-sm text-white/80">Jumantik · DAOP · PPSU</p>
-            </div>
-          </div>
-        }
-
-        <p class="relative mt-10 text-sm text-white/75">
+        <p class="relative z-[1] px-12 pb-10 text-sm text-white/70 xl:px-16">
           Kelurahan Rawajati · Kec. Pancoran, Jakarta Selatan
         </p>
       </section>
 
-      <section class="flex items-start justify-center px-4 py-8 sm:px-8 lg:items-center lg:py-10">
+      <section class="flex items-start justify-center bg-slate-50 px-4 py-8 sm:px-8 lg:items-center lg:py-12">
         <div class="w-full max-w-md">
           <div class="mb-6 lg:hidden">
             <p class="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">SI-RAWAJATI</p>
