@@ -227,6 +227,13 @@ const ROLE_CARDS: RoleCard[] = [
               <p class="mt-1 text-sm text-slate-500">
                 Pilih peran dulu — tampilan &amp; tugas mengikuti portal masing-masing.
               </p>
+              <div class="mt-3 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2.5 text-xs leading-relaxed text-blue-900">
+                <strong>Demo SI-RAWAJATI.</strong> Nanti akun bisa memakai email staf masing-masing.
+                Untuk dicoba sekarang, pilih peran lalu pakai akun contoh di bawah.
+                <a class="mt-1 block font-bold text-blue-800 underline" href="/cara-coba.html" target="_blank" rel="noopener"
+                  >Panduan singkat (1 halaman)</a
+                >
+              </div>
 
               <div class="mt-5 grid gap-2.5">
                 @for (card of roles; track card.id) {
@@ -285,10 +292,13 @@ const ROLE_CARDS: RoleCard[] = [
                   </ul>
                 </div>
 
-                <h3 class="mt-5 text-sm font-bold text-slate-900">Masuk dengan akun</h3>
+                <h3 class="mt-5 text-sm font-bold text-slate-900">Masuk dengan akun staf</h3>
+                <p class="mt-1 text-xs text-slate-500">
+                  Isi email &amp; kata sandi akun demo, atau tekan tombol masuk cepat di bawah.
+                </p>
                 <form class="mt-3 space-y-3" (ngSubmit)="submit()">
                   <div>
-                    <label class="field-label" for="email">Email</label>
+                    <label class="field-label" for="email">Email staf</label>
                     <input
                       id="email"
                       class="field-input"
@@ -296,6 +306,7 @@ const ROLE_CARDS: RoleCard[] = [
                       [(ngModel)]="email"
                       name="email"
                       autocomplete="username"
+                      placeholder="contoh: sekkel@kelurahan.id"
                     />
                   </div>
                   <div>
@@ -307,6 +318,7 @@ const ROLE_CARDS: RoleCard[] = [
                       [(ngModel)]="password"
                       name="password"
                       autocomplete="current-password"
+                      placeholder="Kata sandi akun demo"
                     />
                   </div>
                   @if (error()) {
@@ -316,7 +328,7 @@ const ROLE_CARDS: RoleCard[] = [
                 </form>
 
                 <div class="mt-5">
-                  <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Masuk cepat demo</p>
+                  <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Masuk cepat (akun contoh)</p>
                   <div class="mt-2 grid gap-2">
                     @for (d of card.demos; track d.email) {
                       <button type="button" class="quick-pill" (click)="quick(d.email)">

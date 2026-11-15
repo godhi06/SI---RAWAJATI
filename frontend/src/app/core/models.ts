@@ -15,6 +15,10 @@ export interface FotoKerjaSlot {
   timestamp: string;
   latitude: number;
   longitude: number;
+  /** Akurasi GPS perangkat (meter), jika ada */
+  accuracyMeters?: number;
+  /** device = GPS HP asli; simulasi = fallback demo */
+  gpsSource?: 'device' | 'simulasi';
   /** URL mock/real foto lapangan (contoh: /image/ppsu1.jpg) */
   imageUrl?: string;
 }

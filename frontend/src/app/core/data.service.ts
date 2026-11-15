@@ -866,19 +866,67 @@ export class DataService {
     this.showToast('Kondisi aset PPSU diperbarui.');
   }
 
-  /** Simulasi foto lapangan + timestamp + koordinat GPS Rawajati. */
+  /** Koordinat fallback area Rawajati (hanya jika GPS perangkat gagal/ditolak). */
+  private gpsSimulasiRawajati(): {
+    latitude: number;
+    longitude: number;
+    gpsSource: 'simulasi';
+  } {
+    const baseLat = -6.2568;
+    const baseLng = 106.8542;
+    return {
+      latitude: Number((baseLat + (Math.random() - 0.5) * 0.002).toFixed(6)),
+      longitude: Number((baseLng + (Math.random() - 0.5) * 0.002).toFixed(6)),
+      gpsSource: 'simulasi',
+    };
+  }
+
+  /** Ambil GPS HP/browser asli; fallback simulasi bila ditolak/timeout. */
+  ambilGpsPerangkat(): Promise<{
+    latitude: number;
+    longitude: number;
+    accuracyMeters?: number;
+    gpsSource: 'device' | 'simulasi';
+  }> {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      return Promise.resolve(this.gpsSimulasiRawajati());
+    }
+    return new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          resolve({
+            latitude: Number(pos.coords.latitude.toFixed(6)),
+            longitude: Number(pos.coords.longitude.toFixed(6)),
+            accuracyMeters: Math.round(pos.coords.accuracy),
+            gpsSource: 'device',
+          });
+        },
+        () => resolve(this.gpsSimulasiRawajati()),
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 },
+      );
+    });
+  }
+
+  /** Foto lapangan + timestamp + koordinat (utama: GPS perangkat). */
   buatFotoSlot(
     label: FotoKerjaSlot['label'],
     fileName: string,
+    gps?: {
+      latitude: number;
+      longitude: number;
+      accuracyMeters?: number;
+      gpsSource?: 'device' | 'simulasi';
+    },
   ): FotoKerjaSlot {
-    const baseLat = -6.2568;
-    const baseLng = 106.8542;
+    const fallback = this.gpsSimulasiRawajati();
     return {
       label,
       fileName,
       timestamp: new Date().toISOString(),
-      latitude: Number((baseLat + (Math.random() - 0.5) * 0.002).toFixed(6)),
-      longitude: Number((baseLng + (Math.random() - 0.5) * 0.002).toFixed(6)),
+      latitude: gps?.latitude ?? fallback.latitude,
+      longitude: gps?.longitude ?? fallback.longitude,
+      accuracyMeters: gps?.accuracyMeters,
+      gpsSource: gps?.gpsSource ?? fallback.gpsSource,
     };
   }
 

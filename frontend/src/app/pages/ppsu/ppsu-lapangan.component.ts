@@ -121,8 +121,12 @@ type FotoKey = 'before' | 'progress' | 'after';
           <div class="space-y-3">
             <p class="field-label mb-0">Upload foto wajib (3 slot)</p>
             <p class="text-xs text-slate-500">
-              Di laptop: kamera webcam. Di HP: kamera HP. Atau pilih dari galeri.
+              Di HP: izinkan lokasi — GPS perangkat ikut tertanam di tiap foto (Before / Progress /
+              After). Di laptop: kamera webcam atau galeri; GPS ikut jika browser mengizinkan.
             </p>
+            @if (gpsStatus()) {
+              <p class="text-xs font-semibold text-slate-600">{{ gpsStatus() }}</p>
+            }
 
             @for (slot of fotoSlots; track slot.key) {
               <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
@@ -164,7 +168,17 @@ type FotoKey = 'before' | 'progress' | 'after';
                   <div class="mt-2 space-y-1 rounded-lg bg-white px-3 py-2 text-xs text-slate-600">
                     <p>📎 {{ f.fileName }}</p>
                     <p>⏱ {{ formatTs(f.timestamp) }}</p>
-                    <p>📍 GPS {{ f.latitude }}, {{ f.longitude }}</p>
+                    <p>
+                      📍 GPS {{ f.latitude }}, {{ f.longitude }}
+                      @if (f.gpsSource === 'device') {
+                        <span class="font-semibold text-emerald-700"> · GPS HP asli</span>
+                      } @else {
+                        <span class="font-semibold text-amber-700"> · fallback demo</span>
+                      }
+                    </p>
+                    @if (f.accuracyMeters != null) {
+                      <p>± {{ f.accuracyMeters }} m</p>
+                    }
                   </div>
                 }
               </div>
@@ -176,8 +190,8 @@ type FotoKey = 'before' | 'progress' | 'after';
             <textarea class="field-input" rows="2" [(ngModel)]="catatan" name="catatan"></textarea>
           </div>
 
-          <button class="btn-primary w-full" type="submit" [disabled]="!bisaKirim()">
-            Kirim Laporan Kerja
+          <button class="btn-primary w-full" type="submit" [disabled]="!bisaKirim() || fotoLoading()">
+            {{ fotoLoading() ? 'Menyematkan GPS…' : 'Kirim Laporan Kerja' }}
           </button>
 
           @if (sukses()) {
@@ -245,6 +259,8 @@ export class PpsuLapanganComponent {
   readonly tab = signal<FieldTab>('kerja');
   readonly sukses = signal(false);
   readonly kameraSlot = signal<FotoKey | null>(null);
+  readonly gpsStatus = signal<string | null>(null);
+  readonly fotoLoading = signal(false);
 
   lokasi = 'Jl. Rawajati Timur';
   jenis: JenisKerjaPpsu = 'KURAS_SALURAN';
@@ -306,10 +322,20 @@ export class PpsuLapanganComponent {
     const name = file.name.replace(/\.[^.]+$/, '') + '.jpg';
     const label =
       key === 'before' ? 'BEFORE_0' : key === 'progress' ? 'PROGRESS_50' : 'AFTER_100';
-    const slot = this.data.buatFotoSlot(label, name);
-    if (key === 'before') this.fotoBefore = slot;
-    if (key === 'progress') this.fotoProgress = slot;
-    if (key === 'after') this.fotoAfter = slot;
+    this.fotoLoading.set(true);
+    this.gpsStatus.set('Mengambil GPS perangkat…');
+    void this.data.ambilGpsPerangkat().then((gps) => {
+      const slot = this.data.buatFotoSlot(label, name, gps);
+      if (key === 'before') this.fotoBefore = slot;
+      if (key === 'progress') this.fotoProgress = slot;
+      if (key === 'after') this.fotoAfter = slot;
+      this.gpsStatus.set(
+        gps.gpsSource === 'device'
+          ? 'GPS HP asli tertanam di foto.'
+          : 'GPS perangkat tidak tersedia — memakai fallback demo Rawajati.',
+      );
+      this.fotoLoading.set(false);
+    });
   }
 
   bisaKirim(): boolean {
