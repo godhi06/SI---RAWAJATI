@@ -22,6 +22,34 @@ interface RoleCard {
 
 const ROLE_CARDS: RoleCard[] = [
   {
+    id: 'STAF',
+    title: 'Staf Kelurahan',
+    subtitle: 'Lurah / Sekkel / Kasi',
+    badge: 'ADM',
+    accent: 'border-blue-300 bg-blue-50 hover:border-blue-500',
+    iconBg: 'bg-blue-100 text-blue-800',
+    icon: 'SI',
+    tugas: [
+      'Surat Keluar → sebar ke RW, Ketua RT, dan LMK',
+      'Agenda rapat & kerja bakti (biasanya Sekkel)',
+      'Pantauan lintas modul + export laporan resmi',
+    ],
+    demos: [
+      {
+        email: 'sekkel@kelurahan.id',
+        label: 'Sekkel — Maya Kartika (Surat Keluar + agenda)',
+        hint: 'sekkel@kelurahan.id · sekkel123',
+      },
+      {
+        email: 'lurah@kelurahan.id',
+        label: 'Lurah — Sariman, S.Sos, M.Si',
+        hint: 'lurah@kelurahan.id · admin123',
+      },
+    ],
+    panelTitle: 'Portal Staf Kelurahan',
+    panelBlurb: 'Lurah & Sekkel kirim undangan ke portal RW/RT dan WA langsung ke LMK.',
+  },
+  {
     id: 'RW',
     title: 'Ketua RW',
     subtitle: 'Koordinasi wilayah & DAOP RW',
@@ -140,34 +168,6 @@ const ROLE_CARDS: RoleCard[] = [
     ],
     panelTitle: 'Portal Staff PPSU',
     panelBlurb: 'Dokumentasi kerja lapangan, aset gudang, dan rekap operasional.',
-  },
-  {
-    id: 'STAF',
-    title: 'Staf Kelurahan',
-    subtitle: 'Lurah / Sekkel / Kasi',
-    badge: 'ADM',
-    accent: 'border-blue-300 bg-blue-50 hover:border-blue-500',
-    iconBg: 'bg-blue-100 text-blue-800',
-    icon: 'SI',
-    tugas: [
-      'Surat Keluar → sebar ke RW, Ketua RT, dan LMK',
-      'Agenda rapat & kerja bakti (biasanya Sekkel)',
-      'Pantauan lintas modul + export laporan resmi',
-    ],
-    demos: [
-      {
-        email: 'sekkel@kelurahan.id',
-        label: 'Sekkel — Maya Kartika (Surat Keluar + agenda)',
-        hint: 'sekkel@kelurahan.id · sekkel123',
-      },
-      {
-        email: 'lurah@kelurahan.id',
-        label: 'Lurah — Sariman, S.Sos, M.Si',
-        hint: 'lurah@kelurahan.id · admin123',
-      },
-    ],
-    panelTitle: 'Portal Staf Kelurahan',
-    panelBlurb: 'Lurah & Sekkel kirim undangan ke portal RW/RT dan WA langsung ke LMK.',
   },
 ];
 
