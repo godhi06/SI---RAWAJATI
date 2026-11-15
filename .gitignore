@@ -1,0 +1,22 @@
+# Dependencies & build
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+**/npm-debug.log*
+**/yarn-error.log*
+
+# IDE / OS
+.idea/
+.vscode/
+.history/
+.DS_Store
+Thumbs.db
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Misc
+*.log
+coverage/
