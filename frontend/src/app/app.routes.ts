@@ -31,6 +31,8 @@ import { EkbangComponent } from './pages/ekbang/ekbang.component';
 import { MasterDataComponent } from './pages/master/master-data.component';
 import { AgendaComponent } from './pages/agenda/agenda.component';
 import { SuratKeluarComponent } from './pages/surat/surat-keluar.component';
+import { PerintahComponent } from './pages/perintah/perintah.component';
+import { KalenderOpsComponent } from './pages/kalender/kalender-ops.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -59,6 +61,16 @@ export const routes: Routes = [
       {
         path: 'agenda',
         component: AgendaComponent,
+        canActivate: [roleGuard(['ADMIN_KEL', 'KOORD_RW'])],
+      },
+      {
+        path: 'perintah',
+        component: PerintahComponent,
+        canActivate: [roleGuard(['ADMIN_KEL', 'KOORD_RW', 'PETUGAS_PPSU'])],
+      },
+      {
+        path: 'kalender',
+        component: KalenderOpsComponent,
         canActivate: [roleGuard(['ADMIN_KEL', 'KOORD_RW'])],
       },
       {

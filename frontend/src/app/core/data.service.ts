@@ -12,6 +12,9 @@ import {
   KategoriBangunan,
   KategoriTugasPpsu,
   JenisLaporanKeuanganRt,
+  JenisKalenderOps,
+  JenisPenerimaPerintah,
+  KalenderOpsItem,
   KegiatanSaluran,
   KerjaBaktiRw,
   KodeSuratKeluar,
@@ -19,7 +22,9 @@ import {
   LaporanKeuanganRt,
   LaporanKerjaPpsu,
   LaporanPsn,
+  PerintahLurah,
   PesertaAgenda,
+  PrioritasPerintah,
   RekapMapPmi,
   RumahWarga,
   Rt,
@@ -33,6 +38,7 @@ import {
   StatusKerjaBakti,
   StatusLaporanKeuanganRt,
   StatusLaporanPsn,
+  StatusPerintahLurah,
   StatusPinjamAlat,
   StatusVerifikasi,
   SuratKeluar,
@@ -64,6 +70,7 @@ export class DataService {
   readonly suratKeluars = signal<SuratKeluar[]>([]);
   readonly setoranSosials = signal<SetoranSosial[]>([]);
   readonly rekapMapPmis = signal<RekapMapPmi[]>([]);
+  readonly perintahLurahs = signal<PerintahLurah[]>([]);
   /** Nominal wajib BAZNAS + 1 kupon (kebiasaan Rawajati). */
   readonly nominalWajibBaznas = 100_000;
   /** Detail undangan PSN (untuk cetak template + blast WA). */
@@ -285,6 +292,7 @@ export class DataService {
     this.suratKeluars.set(structuredClone(seed.suratKeluars));
     this.setoranSosials.set(structuredClone(seed.setoranSosials));
     this.rekapMapPmis.set(structuredClone(seed.rekapMapPmis));
+    this.perintahLurahs.set(structuredClone(seed.perintahLurahs));
   }
 
   findUser(email: string, password: string): UserAccount | undefined {
@@ -2020,5 +2028,322 @@ export class DataService {
       TAMU_LAYANAN: 'Tamu layanan',
     };
     return map[s];
+  }
+
+  // ─── Perintah Lurah / tindak lanjut ─────────────────────────────────────
+
+  perintahLurahsSorted = computed(() =>
+    [...this.perintahLurahs()].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
+  );
+
+  perintahAktifCount = computed(
+    () =>
+      this.perintahLurahs().filter(
+        (p) => p.status === 'BARU' || p.status === 'DITERIMA' || p.status === 'DIKERJAKAN',
+      ).length,
+  );
+
+  labelStatusPerintah(s: StatusPerintahLurah): string {
+    const map: Record<StatusPerintahLurah, string> = {
+      BARU: 'Baru',
+      DITERIMA: 'Diterima',
+      DIKERJAKAN: 'Dikerjakan',
+      SELESAI: 'Selesai',
+      DIBATALKAN: 'Dibatalkan',
+    };
+    return map[s];
+  }
+
+  labelPrioritasPerintah(p: PrioritasPerintah): string {
+    return p === 'URGENT' ? 'Urgent' : 'Normal';
+  }
+
+  /** Opsi penerima untuk form buat perintah. */
+  opsiPenerimaPerintah(): Array<{
+    key: string;
+    jenis: JenisPenerimaPerintah;
+    userId?: string;
+    rwId?: string;
+    label: string;
+  }> {
+    const staf = this.users()
+      .filter((u) => u.role === 'ADMIN_KEL' && u.id !== 'u-admin')
+      .map((u) => ({
+        key: `STAF:${u.id}`,
+        jenis: 'STAF' as const,
+        userId: u.id,
+        label: `${u.name} · ${u.jabatan}`,
+      }));
+    const rw = this.rws().map((r) => ({
+      key: `RW:${r.id}`,
+      jenis: 'RW' as const,
+      rwId: r.id,
+      label: `Ketua ${this.labelRw(r.nomor)} · ${r.namaKetua}`,
+    }));
+    const ppsu = this.users()
+      .filter((u) => u.role === 'PETUGAS_PPSU')
+      .map((u) => ({
+        key: `PPSU:${u.id}`,
+        jenis: 'PPSU' as const,
+        userId: u.id,
+        label: `${u.name} · ${u.jabatan}`,
+      }));
+    return [...staf, ...rw, ...ppsu];
+  }
+
+  perintahUntukUser(user: UserAccount | null | undefined): PerintahLurah[] {
+    if (!user) return [];
+    const all = this.perintahLurahsSorted();
+    if (user.role === 'ADMIN_KEL') {
+      // Lurah & staf: lihat semua + yang ditugaskan ke mereka
+      return all;
+    }
+    if (user.role === 'KOORD_RW') {
+      return all.filter((p) => p.penerimaJenis === 'RW' && p.penerimaRwId === user.rwId);
+    }
+    if (user.role === 'PETUGAS_PPSU') {
+      return all.filter((p) => p.penerimaJenis === 'PPSU' && p.penerimaUserId === user.id);
+    }
+    return [];
+  }
+
+  perintahInboxCount(user: UserAccount | null | undefined): number {
+    return this.perintahUntukUser(user).filter(
+      (p) =>
+        (p.status === 'BARU' || p.status === 'DITERIMA' || p.status === 'DIKERJAKAN') &&
+        (user?.role === 'ADMIN_KEL'
+          ? p.penerimaJenis === 'STAF' && p.penerimaUserId === user.id
+          : true),
+    ).length;
+  }
+
+  addPerintahLurah(input: {
+    judul: string;
+    isi: string;
+    prioritas: PrioritasPerintah;
+    tenggatAt: string;
+    penerimaKey: string;
+    dibuatOlehUserId: string;
+    dibuatOlehNama: string;
+  }): PerintahLurah | null {
+    const judul = input.judul.trim();
+    const isi = input.isi.trim();
+    if (!judul || !isi || !input.penerimaKey || !input.tenggatAt) {
+      this.showToast('Lengkapi judul, isi, penerima, dan tenggat.');
+      return null;
+    }
+    const opt = this.opsiPenerimaPerintah().find((o) => o.key === input.penerimaKey);
+    if (!opt) {
+      this.showToast('Penerima tidak valid.');
+      return null;
+    }
+    const now = new Date().toISOString().slice(0, 19);
+    const row: PerintahLurah = {
+      id: `pr-${Date.now()}`,
+      kelurahanId: this.kelurahan.id,
+      judul,
+      isi,
+      prioritas: input.prioritas,
+      status: 'BARU',
+      tenggatAt: input.tenggatAt,
+      dibuatOlehUserId: input.dibuatOlehUserId,
+      dibuatOlehNama: input.dibuatOlehNama,
+      penerimaJenis: opt.jenis,
+      penerimaUserId: opt.userId,
+      penerimaRwId: opt.rwId,
+      penerimaLabel: opt.label,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.perintahLurahs.update((list) => [row, ...list]);
+    this.showToast(`Perintah dikirim ke ${opt.label}.`);
+    return row;
+  }
+
+  updateStatusPerintah(
+    id: string,
+    status: StatusPerintahLurah,
+    catatan?: string,
+  ): void {
+    const now = new Date().toISOString().slice(0, 19);
+    this.perintahLurahs.update((list) =>
+      list.map((p) => {
+        if (p.id !== id) return p;
+        const next: PerintahLurah = {
+          ...p,
+          status,
+          updatedAt: now,
+          catatanTindakLanjut:
+            catatan !== undefined ? catatan.trim() || undefined : p.catatanTindakLanjut,
+        };
+        if (status === 'DITERIMA') next.diterimaAt = now;
+        if (status === 'DIKERJAKAN') next.dikerjakanAt = now;
+        if (status === 'SELESAI') next.selesaiAt = now;
+        return next;
+      }),
+    );
+    this.showToast(`Status perintah → ${this.labelStatusPerintah(status)}.`);
+  }
+
+  // ─── Kalender Operasional (gabungan) ────────────────────────────────────
+
+  private ymdLocal(d: Date): string {
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  }
+
+  /** Jumat PSN mendatang (4 minggu) — recurring operasional. */
+  private jumatPsnMendatang(from = new Date(), count = 4): string[] {
+    const out: string[] = [];
+    const d = new Date(from);
+    d.setHours(12, 0, 0, 0);
+    // maju ke Jumat (5)
+    while (d.getDay() !== 5) d.setDate(d.getDate() + 1);
+    for (let i = 0; i < count; i++) {
+      out.push(this.ymdLocal(d));
+      d.setDate(d.getDate() + 7);
+    }
+    return out;
+  }
+
+  /**
+   * Satu layar: agenda + kerja bakti + saluran PPSU + Jumat PSN + undangan + tenggat perintah.
+   */
+  kalenderOperasional(hariSpan = 21): KalenderOpsItem[] {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const end = new Date(today);
+    end.setDate(end.getDate() + hariSpan);
+    const inRange = (ymd: string) => {
+      const t = new Date(`${ymd}T12:00:00`);
+      return t >= today && t <= end;
+    };
+
+    const items: KalenderOpsItem[] = [];
+
+    for (const a of this.agendaRapats()) {
+      if (!inRange(a.tanggal)) continue;
+      if (a.status === 'DIBATALKAN') continue;
+      items.push({
+        id: `agenda-${a.id}`,
+        jenis: 'AGENDA',
+        tanggal: a.tanggal,
+        jam: a.jamMulai,
+        judul: a.judul,
+        meta: `${a.jenisKegiatan ?? 'RAPAT'} · ${a.tempat}`,
+        link: '/app/agenda',
+        statusLabel: a.status,
+      });
+    }
+
+    for (const k of this.kerjaBaktiRws()) {
+      if (!inRange(k.tanggal)) continue;
+      const rw = this.getRw(k.rwId);
+      items.push({
+        id: `kb-${k.id}`,
+        jenis: 'KERJA_BAKTI',
+        tanggal: k.tanggal,
+        judul: `Kerja bakti ${rw ? this.labelRw(rw.nomor) : 'RW'}`,
+        meta: `${k.lokasi} · PIC ${k.picNama}`,
+        link: '/app/agenda',
+        statusLabel: k.status,
+      });
+    }
+
+    for (const s of this.kegiatanSalurans()) {
+      if (!inRange(s.tanggalRencana)) continue;
+      items.push({
+        id: `sal-${s.id}`,
+        jenis: 'PPSU_SALURAN',
+        tanggal: s.tanggalRencana,
+        judul: s.namaLokasi,
+        meta: `${s.ruasSaluran} · ${s.petugas}`,
+        link: '/app/ekbang',
+        statusLabel: s.statusKegiatan,
+      });
+    }
+
+    for (const ymd of this.jumatPsnMendatang(today, 4)) {
+      if (!inRange(ymd)) continue;
+      items.push({
+        id: `psn-jumat-${ymd}`,
+        jenis: 'PSN_JUMAT',
+        tanggal: ymd,
+        jam: '07:00',
+        judul: 'Jumat PSN Jumantik',
+        meta: 'Pemeriksaan jentik rutin tingkat RT',
+        link: '/app/psn',
+        statusLabel: 'RUTIN',
+      });
+    }
+
+    const und = this.undanganPsnDraft();
+    // Ambil tanggal dari string "Jumat, 21 November 2026" bila bisa; fallback tetap tampilkan meta
+    const undMatch = und.hariTanggal.match(/(\d{1,2})\s+(\w+)\s+(\d{4})/);
+    if (undMatch) {
+      const bulanMap: Record<string, number> = {
+        januari: 0,
+        februari: 1,
+        maret: 2,
+        april: 3,
+        mei: 4,
+        juni: 5,
+        juli: 6,
+        agustus: 7,
+        september: 8,
+        oktober: 9,
+        november: 10,
+        desember: 11,
+      };
+      const bl = bulanMap[undMatch[2].toLowerCase()];
+      if (bl != null) {
+        const d = new Date(Number(undMatch[3]), bl, Number(undMatch[1]));
+        const ymd = this.ymdLocal(d);
+        if (inRange(ymd)) {
+          items.push({
+            id: 'undangan-psn-draft',
+            jenis: 'UNDANGAN_PSN',
+            tanggal: ymd,
+            jam: und.jam.replace(/[^\d:]/g, '').slice(0, 5) || undefined,
+            judul: 'Undangan evaluasi PSN',
+            meta: `${und.tempat} · ${und.nomorSurat}`,
+            link: '/app/psn/undangan-cetak',
+            statusLabel: 'UNDANGAN',
+          });
+        }
+      }
+    }
+
+    for (const p of this.perintahLurahs()) {
+      if (!inRange(p.tenggatAt)) continue;
+      if (p.status === 'SELESAI' || p.status === 'DIBATALKAN') continue;
+      items.push({
+        id: `pr-cal-${p.id}`,
+        jenis: 'PERINTAH',
+        tanggal: p.tenggatAt,
+        judul: `Tenggat: ${p.judul}`,
+        meta: `${p.penerimaLabel} · ${this.labelStatusPerintah(p.status)}`,
+        link: '/app/perintah',
+        statusLabel: p.prioritas,
+      });
+    }
+
+    return items.sort((a, b) => {
+      const ta = `${a.tanggal}T${a.jam ?? '99:99'}`;
+      const tb = `${b.tanggal}T${b.jam ?? '99:99'}`;
+      return ta.localeCompare(tb);
+    });
+  }
+
+  labelJenisKalender(j: JenisKalenderOps): string {
+    const map: Record<JenisKalenderOps, string> = {
+      AGENDA: 'Agenda',
+      KERJA_BAKTI: 'Kerja bakti',
+      PPSU_SALURAN: 'PPSU saluran',
+      PSN_JUMAT: 'PSN Jumat',
+      UNDANGAN_PSN: 'Undangan PSN',
+      PERINTAH: 'Tenggat perintah',
+    };
+    return map[j];
   }
 }

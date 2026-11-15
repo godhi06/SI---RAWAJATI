@@ -4,6 +4,7 @@ import {
   Kelurahan,
   KerjaBaktiRw,
   LaporanKeuanganRt,
+  PerintahLurah,
   Rt,
   Rw,
   RekapMapPmi,
@@ -1126,7 +1127,95 @@ export function createDemoSeed(): DemoSeed {
     suratKeluars: seedSuratKeluar(),
     setoranSosials: seedSetoranSosial(rts, rws),
     rekapMapPmis: seedRekapMapPmi(),
+    perintahLurahs: seedPerintahLurah(rws),
   };
+}
+
+function seedPerintahLurah(rws: Rw[]): PerintahLurah[] {
+  const rw7 = rws.find((r) => r.id === 'rw-7')!;
+  const today = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const ymd = (offset: number) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + offset);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  };
+  const now = `${ymd(0)}T08:00:00`;
+
+  return [
+    {
+      id: 'pr-1',
+      kelurahanId: 'kel-1',
+      judul: 'Cek saluran Rawajati Timur sebelum hujan',
+      isi: 'Minta PPSU survey cepat ruas Rawajati Timur (RW 01–03). Foto kondisi + laporkan jika perlu kuras darurat.',
+      prioritas: 'URGENT',
+      status: 'BARU',
+      tenggatAt: ymd(1),
+      dibuatOlehUserId: 'u-admin',
+      dibuatOlehNama: 'Sariman, S.Sos, M.Si',
+      penerimaJenis: 'PPSU',
+      penerimaUserId: 'u-ppsu-koord',
+      penerimaLabel: 'Bambang Sutrisno · Koordinator PPSU',
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: 'pr-2',
+      kelurahanId: 'kel-1',
+      judul: 'Follow-up zona waspada jentik RW 07',
+      isi: 'Koordinasikan kader Jumantik RT yang ABJ rendah. Pastikan validasi RW selesai sebelum rapat Jumat.',
+      prioritas: 'URGENT',
+      status: 'DITERIMA',
+      tenggatAt: ymd(2),
+      dibuatOlehUserId: 'u-admin',
+      dibuatOlehNama: 'Sariman, S.Sos, M.Si',
+      penerimaJenis: 'RW',
+      penerimaRwId: rw7.id,
+      penerimaLabel: `Ketua RW ${rw7.nomor} · ${rw7.namaKetua}`,
+      diterimaAt: `${ymd(0)}T09:15:00`,
+      createdAt: `${ymd(-1)}T14:00:00`,
+      updatedAt: `${ymd(0)}T09:15:00`,
+    },
+    {
+      id: 'pr-3',
+      kelurahanId: 'kel-1',
+      judul: 'Siapkan bahan rapat evaluasi PSN',
+      isi: 'Rekap ABJ per RW + daftar zona merah untuk slide Lurah. Kirim ke Sekkel paling lambat H-1.',
+      prioritas: 'NORMAL',
+      status: 'DIKERJAKAN',
+      tenggatAt: ymd(3),
+      dibuatOlehUserId: 'u-admin',
+      dibuatOlehNama: 'Sariman, S.Sos, M.Si',
+      penerimaJenis: 'STAF',
+      penerimaUserId: 'u-kasi-kesra',
+      penerimaLabel: 'Siti Marlina · Kasi Kesra',
+      diterimaAt: `${ymd(-2)}T10:00:00`,
+      dikerjakanAt: `${ymd(-1)}T11:30:00`,
+      catatanTindakLanjut: 'Draft grafik sudah dikumpulkan, tinggal finalisasi slide.',
+      createdAt: `${ymd(-3)}T08:30:00`,
+      updatedAt: `${ymd(-1)}T11:30:00`,
+    },
+    {
+      id: 'pr-4',
+      kelurahanId: 'kel-1',
+      judul: 'Inventory alat rusak gudang PPSU',
+      isi: 'Update master aset: alat rusak ringan/berat. Usulkan perbaikan atau penggantian ke Ekbang.',
+      prioritas: 'NORMAL',
+      status: 'SELESAI',
+      tenggatAt: ymd(-2),
+      dibuatOlehUserId: 'u-admin',
+      dibuatOlehNama: 'Sariman, S.Sos, M.Si',
+      penerimaJenis: 'STAF',
+      penerimaUserId: 'u-kasi-ekbang',
+      penerimaLabel: 'Rudi Hartono · Kasi Ekbang',
+      diterimaAt: `${ymd(-5)}T09:00:00`,
+      dikerjakanAt: `${ymd(-4)}T13:00:00`,
+      selesaiAt: `${ymd(-2)}T16:00:00`,
+      catatanTindakLanjut: '3 unit dicatat rusak ringan; usulan perbaikan sudah dilampirkan.',
+      createdAt: `${ymd(-6)}T08:00:00`,
+      updatedAt: `${ymd(-2)}T16:00:00`,
+    },
+  ];
 }
 
 function seedSetoranSosial(rts: Rt[], rws: Rw[]): SetoranSosial[] {

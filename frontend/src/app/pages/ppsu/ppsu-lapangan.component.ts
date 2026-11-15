@@ -50,7 +50,7 @@ type FotoKey = 'before' | 'progress' | 'after';
         <form class="card space-y-4" (ngSubmit)="kirimKerja()">
           <h2 class="text-lg font-bold text-slate-900">Lapor Kerja Rutin (Non-CRM)</h2>
           <p class="text-sm text-slate-500">
-            Wajib foto dari HP: Before 0%, Progress 50%, dan After 100% sebagai bukti kerja lapangan.
+            Ini <strong>bukti kerja</strong> (bukan absen masuk/pulang). Wajib 3 foto + GPS.
           </p>
 
           <div class="rounded-xl border border-blue-100 bg-blue-50/60 px-3 py-3">
@@ -58,6 +58,74 @@ type FotoKey = 'before' | 'progress' | 'after';
             <p class="mt-1 text-sm font-bold text-slate-900">{{ petugasAktif().nama }}</p>
             <p class="mt-0.5 text-xs text-slate-600">{{ petugasAktif().regu }}</p>
             <p class="mt-1 text-[11px] text-slate-500">Otomatis dari akun login — tidak perlu diketik ulang.</p>
+          </div>
+
+          <!-- Foto ditaruh atas supaya langsung kelihatan di HP (tidak perlu scroll jauh) -->
+          <div class="space-y-3 rounded-2xl border-2 border-blue-200 bg-blue-50/40 p-3">
+            <p class="field-label mb-0 text-blue-900">📷 Upload foto wajib (3 slot)</p>
+            <p class="text-xs text-slate-600">
+              Tekan <strong>Kamera</strong> atau <strong>Galeri</strong>. Di HP: izinkan lokasi agar GPS
+              asli tertanam.
+            </p>
+            @if (gpsStatus()) {
+              <p class="text-xs font-semibold text-slate-700">{{ gpsStatus() }}</p>
+            }
+
+            @for (slot of fotoSlots; track slot.key) {
+              <div class="rounded-xl border border-slate-200 bg-white p-3">
+                <div class="flex items-center justify-between gap-2">
+                  <p class="text-sm font-bold text-slate-800">{{ slot.title }}</p>
+                  @if (slot.data) {
+                    <span class="badge-ok">Terunggah</span>
+                  } @else {
+                    <span class="badge-muted">Wajib</span>
+                  }
+                </div>
+
+                <input
+                  [id]="'ppsu-galeri-' + slot.key"
+                  class="sr-only"
+                  type="file"
+                  accept="image/*"
+                  (change)="onFoto($event, slot.key)"
+                />
+
+                <div class="mt-2 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    class="btn-primary !py-2 text-sm"
+                    (click)="bukaKameraSlot(slot.key)"
+                  >
+                    Kamera
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-secondary !py-2 text-sm"
+                    (click)="bukaInput('ppsu-galeri-' + slot.key)"
+                  >
+                    Galeri
+                  </button>
+                </div>
+
+                @if (slot.data; as f) {
+                  <div class="mt-2 space-y-1 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                    <p>📎 {{ f.fileName }}</p>
+                    <p>⏱ {{ formatTs(f.timestamp) }}</p>
+                    <p>
+                      📍 GPS {{ f.latitude }}, {{ f.longitude }}
+                      @if (f.gpsSource === 'device') {
+                        <span class="font-semibold text-emerald-700"> · GPS HP asli</span>
+                      } @else {
+                        <span class="font-semibold text-amber-700"> · fallback demo</span>
+                      }
+                    </p>
+                    @if (f.accuracyMeters != null) {
+                      <p>± {{ f.accuracyMeters }} m</p>
+                    }
+                  </div>
+                }
+              </div>
+            }
           </div>
 
           <div>
@@ -117,73 +185,6 @@ type FotoKey = 'before' | 'progress' | 'after';
               </select>
             </div>
           }
-
-          <div class="space-y-3">
-            <p class="field-label mb-0">Upload foto wajib (3 slot)</p>
-            <p class="text-xs text-slate-500">
-              Di HP: izinkan lokasi — GPS perangkat ikut tertanam di tiap foto (Before / Progress /
-              After). Di laptop: kamera webcam atau galeri; GPS ikut jika browser mengizinkan.
-            </p>
-            @if (gpsStatus()) {
-              <p class="text-xs font-semibold text-slate-600">{{ gpsStatus() }}</p>
-            }
-
-            @for (slot of fotoSlots; track slot.key) {
-              <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                <div class="flex items-center justify-between gap-2">
-                  <p class="text-sm font-bold text-slate-800">{{ slot.title }}</p>
-                  @if (slot.data) {
-                    <span class="badge-ok">Terunggah</span>
-                  } @else {
-                    <span class="badge-muted">Wajib</span>
-                  }
-                </div>
-
-                <input
-                  [id]="'ppsu-galeri-' + slot.key"
-                  class="sr-only"
-                  type="file"
-                  accept="image/*"
-                  (change)="onFoto($event, slot.key)"
-                />
-
-                <div class="mt-2 grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    class="btn-primary !py-2 text-sm"
-                    (click)="bukaKameraSlot(slot.key)"
-                  >
-                    Kamera
-                  </button>
-                  <button
-                    type="button"
-                    class="btn-secondary !py-2 text-sm"
-                    (click)="bukaInput('ppsu-galeri-' + slot.key)"
-                  >
-                    Galeri
-                  </button>
-                </div>
-
-                @if (slot.data; as f) {
-                  <div class="mt-2 space-y-1 rounded-lg bg-white px-3 py-2 text-xs text-slate-600">
-                    <p>📎 {{ f.fileName }}</p>
-                    <p>⏱ {{ formatTs(f.timestamp) }}</p>
-                    <p>
-                      📍 GPS {{ f.latitude }}, {{ f.longitude }}
-                      @if (f.gpsSource === 'device') {
-                        <span class="font-semibold text-emerald-700"> · GPS HP asli</span>
-                      } @else {
-                        <span class="font-semibold text-amber-700"> · fallback demo</span>
-                      }
-                    </p>
-                    @if (f.accuracyMeters != null) {
-                      <p>± {{ f.accuracyMeters }} m</p>
-                    }
-                  </div>
-                }
-              </div>
-            }
-          </div>
 
           <div>
             <label class="field-label">Catatan (opsional)</label>

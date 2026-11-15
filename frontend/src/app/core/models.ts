@@ -483,6 +483,65 @@ export interface RekapMapPmi {
   catatan?: string;
 }
 
+/** Arahan Lurah / staf → ditugaskan ke Kasi, RW, atau PPSU. */
+export type StatusPerintahLurah =
+  | 'BARU'
+  | 'DITERIMA'
+  | 'DIKERJAKAN'
+  | 'SELESAI'
+  | 'DIBATALKAN';
+
+export type PrioritasPerintah = 'NORMAL' | 'URGENT';
+
+/** Siapa yang mengerjakan perintah. */
+export type JenisPenerimaPerintah = 'STAF' | 'RW' | 'PPSU';
+
+export interface PerintahLurah {
+  id: string;
+  kelurahanId: string;
+  judul: string;
+  isi: string;
+  prioritas: PrioritasPerintah;
+  status: StatusPerintahLurah;
+  /** Batas selesai YYYY-MM-DD */
+  tenggatAt: string;
+  dibuatOlehUserId: string;
+  dibuatOlehNama: string;
+  penerimaJenis: JenisPenerimaPerintah;
+  /** STAF / PPSU: user yang ditugaskan */
+  penerimaUserId?: string;
+  /** RW: wilayah yang ditugaskan */
+  penerimaRwId?: string;
+  /** Label tampilan: "Kasi Ekbang · …" / "Ketua RW 07" */
+  penerimaLabel: string;
+  catatanTindakLanjut?: string;
+  diterimaAt?: string;
+  dikerjakanAt?: string;
+  selesaiAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Item gabungan untuk Kalender Operasional (bukan entitas tersimpan). */
+export type JenisKalenderOps =
+  | 'AGENDA'
+  | 'KERJA_BAKTI'
+  | 'PPSU_SALURAN'
+  | 'PSN_JUMAT'
+  | 'UNDANGAN_PSN'
+  | 'PERINTAH';
+
+export interface KalenderOpsItem {
+  id: string;
+  jenis: JenisKalenderOps;
+  tanggal: string;
+  jam?: string;
+  judul: string;
+  meta: string;
+  link: string;
+  statusLabel?: string;
+}
+
 export interface DemoSeed {
   rws: Rw[];
   rts: Rt[];
@@ -499,4 +558,5 @@ export interface DemoSeed {
   suratKeluars: SuratKeluar[];
   setoranSosials: SetoranSosial[];
   rekapMapPmis: RekapMapPmi[];
+  perintahLurahs: PerintahLurah[];
 }

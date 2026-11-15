@@ -84,6 +84,10 @@ import { DataService } from '../../core/data.service';
         </section>
 
         <section class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <a routerLink="/app/kalender" class="btn-secondary text-center text-sm">Kalender Operasional</a>
+          <a routerLink="/app/perintah" class="btn-secondary text-center text-sm"
+            >Perintah ({{ data.perintahAktifCount() }} aktif)</a
+          >
           <a routerLink="/app/psn" class="btn-secondary text-center text-sm">Laporan PSN</a>
           <a routerLink="/app/ekbang" class="btn-secondary text-center text-sm">Pantauan PPSU</a>
           <a routerLink="/app/daop" class="btn-secondary text-center text-sm">Laporan DAOP</a>

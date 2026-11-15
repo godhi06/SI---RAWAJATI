@@ -65,11 +65,7 @@ interface NavItem {
         </aside>
       }
 
-      <div
-        class="flex min-w-0 flex-1 flex-col"
-        [class.pb-28]="!isPpsuLapanganOnly()"
-        [class.pb-4]="isPpsuLapanganOnly()"
-      >
+      <div class="flex min-w-0 flex-1 flex-col pb-28">
         <header class="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
           <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
             <div class="min-w-0">
@@ -105,25 +101,24 @@ interface NavItem {
         </main>
       </div>
 
-      @if (!isPpsuLapanganOnly()) {
-        <nav
-          class="fixed inset-x-3 bottom-3 z-30 grid gap-1 rounded-2xl border border-slate-200 bg-white/95 p-1.5 shadow-float backdrop-blur lg:hidden"
-          [class.grid-cols-3]="mobileNav().length === 3"
-          [class.grid-cols-4]="mobileNav().length !== 3"
-          style="padding-bottom: max(0.35rem, env(safe-area-inset-bottom))"
-        >
-          @for (item of mobileNav(); track item.path) {
-            <a
-              [routerLink]="item.path"
-              routerLinkActive="bg-blue-50 text-blue-700"
-              class="flex min-h-tap flex-col items-center justify-center rounded-xl px-1 text-slate-500"
-            >
-              <span class="text-base" aria-hidden="true">{{ item.icon }}</span>
-              <span class="mt-0.5 text-center text-[11px] font-semibold leading-tight">{{ item.short }}</span>
-            </a>
-          }
-        </nav>
-      }
+      <nav
+        class="fixed inset-x-3 bottom-3 z-30 grid gap-1 rounded-2xl border border-slate-200 bg-white/95 p-1.5 shadow-float backdrop-blur lg:hidden"
+        [class.grid-cols-2]="mobileNav().length === 2"
+        [class.grid-cols-3]="mobileNav().length === 3"
+        [class.grid-cols-4]="mobileNav().length >= 4"
+        style="padding-bottom: max(0.35rem, env(safe-area-inset-bottom))"
+      >
+        @for (item of mobileNav(); track item.path) {
+          <a
+            [routerLink]="item.path"
+            routerLinkActive="bg-blue-50 text-blue-700"
+            class="flex min-h-tap flex-col items-center justify-center rounded-xl px-1 text-slate-500"
+          >
+            <span class="text-base" aria-hidden="true">{{ item.icon }}</span>
+            <span class="mt-0.5 text-center text-[11px] font-semibold leading-tight">{{ item.short }}</span>
+          </a>
+        }
+      </nav>
     </div>
   `,
 })
@@ -133,8 +128,10 @@ export class ShellComponent {
 
   private readonly nav: NavItem[] = [
     { label: 'Beranda', path: '/app/dashboard', icon: '▣', roles: ['ADMIN_KEL', 'KOORD_RW', 'OP_RT'] },
+    { label: 'Kalender Operasional', path: '/app/kalender', icon: '📅', roles: ['ADMIN_KEL', 'KOORD_RW'] },
+    { label: 'Perintah & Tindak Lanjut', path: '/app/perintah', icon: '⚡', roles: ['ADMIN_KEL', 'KOORD_RW', 'PETUGAS_PPSU'] },
     { label: 'Master Data', path: '/app/master', icon: '⚙', roles: ['ADMIN_KEL', 'PETUGAS_PPSU'] },
-    { label: 'Agenda Kelurahan', path: '/app/agenda', icon: '📅', roles: ['ADMIN_KEL', 'KOORD_RW'] },
+    { label: 'Agenda Kelurahan', path: '/app/agenda', icon: '🗓', roles: ['ADMIN_KEL', 'KOORD_RW'] },
     { label: 'Surat Keluar', path: '/app/surat-keluar', icon: '✉', roles: ['ADMIN_KEL'] },
     { label: 'Pantauan PPSU (Ekbang)', path: '/app/ekbang', icon: '🛠', roles: ['ADMIN_KEL'] },
     /** Hanya kader Jumantik — bukan Ketua RT */
@@ -189,6 +186,11 @@ export class ShellComponent {
         return this.auth.canAccessMasterData();
       }
 
+      // Perintah: anggota PPSU lapangan juga boleh (inbox tugas)
+      if (n.path === '/app/perintah' && role === 'PETUGAS_PPSU') {
+        return true;
+      }
+
       if (n.path === '/app/laporan') {
         return this.auth.canAccessExportHub();
       }
@@ -198,43 +200,41 @@ export class ShellComponent {
 
   readonly mobileNav = computed(() => {
     const role = this.auth.role();
+    const byPath = (path: string, short: string) => {
+      const item = this.nav.find((n) => n.path === path)!;
+      return { ...item, short };
+    };
     if (this.auth.isKetuaRtUser()) {
-      return [
-        { ...this.nav[0], short: 'Beranda' },
-        { ...this.nav[8], short: 'DAOP' },
-      ];
+      return [byPath('/app/dashboard', 'Beranda'), byPath('/app/daop', 'DAOP')];
     }
     if (this.auth.isKaderJumantikUser()) {
       return [
-        { ...this.nav[0], short: 'Beranda' },
-        { ...this.nav[5], short: 'Input' },
-        { ...this.nav[6], short: 'PSN' },
+        byPath('/app/dashboard', 'Beranda'),
+        byPath('/app/psn/input', 'Input'),
+        byPath('/app/psn', 'PSN'),
       ];
     }
     const map: Record<UserRole, Array<NavItem & { short: string }>> = {
       ADMIN_KEL: [
-        { ...this.nav[0], short: 'Beranda' },
-        { ...this.nav[8], short: 'DAOP' },
-        { ...this.nav[9], short: 'PMI' },
-        { ...this.nav[11], short: 'Export' },
+        byPath('/app/dashboard', 'Beranda'),
+        byPath('/app/kalender', 'Kalender'),
+        byPath('/app/perintah', 'Perintah'),
+        byPath('/app/laporan', 'Export'),
       ],
       KOORD_RW: [
-        { ...this.nav[0], short: 'Beranda' },
-        { ...this.nav[2], short: 'Agenda' },
-        { ...this.nav[8], short: 'DAOP' },
-        { ...this.nav[7], short: 'Validasi' },
+        byPath('/app/dashboard', 'Beranda'),
+        byPath('/app/kalender', 'Kalender'),
+        byPath('/app/perintah', 'Perintah'),
+        byPath('/app/daop', 'DAOP'),
       ],
-      OP_RT: [
-        { ...this.nav[0], short: 'Beranda' },
-        { ...this.nav[8], short: 'DAOP' },
-      ],
+      OP_RT: [byPath('/app/dashboard', 'Beranda'), byPath('/app/daop', 'DAOP')],
       PETUGAS_PPSU: this.auth.isKetuaBidangPpsu()
         ? [
-            { ...this.nav[10], short: 'PPSU' },
-            { ...this.nav[1], short: 'Master' },
-            { ...this.nav[11], short: 'Export' },
+            byPath('/app/ppsu', 'PPSU'),
+            byPath('/app/perintah', 'Perintah'),
+            byPath('/app/laporan', 'Export'),
           ]
-        : [{ ...this.nav[10], short: 'PPSU' }],
+        : [byPath('/app/ppsu', 'PPSU'), byPath('/app/perintah', 'Tugas')],
     };
     return role ? map[role] : [];
   });
