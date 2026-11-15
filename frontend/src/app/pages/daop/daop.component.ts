@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+﻿import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -1231,7 +1231,7 @@ export class DaopComponent {
       `untuk periode:\n${bulanList}\n\n` +
       `Mohon kesediaan Bapak/Ibu untuk segera menyetorkan laporan tersebut ke kantor kelurahan ` +
       `(dengan tanda tangan basah), atau mengunggah hasil pindaian dokumen yang telah ditandatangani ` +
-      `melalui sistem SI-RAWAJATI.\n\n` +
+      `melalui sistem JATI.\n\n` +
       `Atas perhatian dan kerja samanya, kami ucapkan terima kasih.\n\n` +
       `Hormat kami,\nKelurahan Rawajati`;
 

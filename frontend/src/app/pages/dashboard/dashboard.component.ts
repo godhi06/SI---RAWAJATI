@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+﻿import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
@@ -487,7 +487,7 @@ export class DashboardComponent {
         `Dengan hormat, kami dari Kelurahan Rawajati menyampaikan bahwa wilayah Bapak/Ibu ` +
         `saat ini berstatus zona merah jentik (ABJ ${rt.abj}%).\n\n` +
         `Mohon kesediaan untuk mengintensifkan Jumat PSN / pemeriksaan jentik dan melaporkan ` +
-        `hasilnya melalui SI-RAWAJATI.\n\n` +
+        `hasilnya melalui JATI.\n\n` +
         `Terima kasih.\nKelurahan Rawajati`;
       items.push({
         id: `zm-${rt.rtId}`,
@@ -519,7 +519,7 @@ export class DashboardComponent {
         `Yth. Bapak/Ibu ${ketua}\n${jabatan} ${wilayah.replace(' (Ketua RW)', '')}\n\n` +
         `Dengan hormat, kami dari Kelurahan Rawajati mengingatkan kewajiban Laporan DAOP ` +
         `periode ${d.periodeLabel} yang belum kami terima.\n\n` +
-        `Mohon setor ke kelurahan (TTD + stempel basah) atau upload scan di SI-RAWAJATI.\n\n` +
+        `Mohon setor ke kelurahan (TTD + stempel basah) atau upload scan di JATI.\n\n` +
         `Terima kasih.\nKelurahan Rawajati`;
       items.push({
         id: `daop-${d.id}`,

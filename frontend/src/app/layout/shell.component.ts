@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+﻿import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/auth.service';
@@ -25,11 +25,11 @@ interface NavItem {
               <div
                 class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-700 text-sm font-extrabold text-white shadow-soft"
               >
-                SI
+                JT
               </div>
               <div class="min-w-0">
-                <p class="text-xs font-bold uppercase tracking-[0.16em] text-blue-700">SI-RAWAJATI</p>
-                <h1 class="truncate text-base font-bold text-slate-900">{{ data.kelurahan.nama }}</h1>
+                <p class="text-base font-extrabold tracking-tight text-blue-700">JATI</p>
+                <h1 class="truncate text-sm font-semibold text-slate-800">{{ data.kelurahan.nama }}</h1>
               </div>
             </div>
             <p class="mt-3 text-xs leading-relaxed text-slate-500">
@@ -69,7 +69,7 @@ interface NavItem {
         <header class="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
           <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
             <div class="min-w-0">
-              <p class="truncate text-xs font-bold uppercase tracking-wider text-blue-700">SI-RAWAJATI</p>
+              <p class="truncate text-sm font-extrabold tracking-tight text-blue-700">JATI</p>
               <p class="truncate text-sm font-semibold text-slate-900 lg:text-base">
                 {{ auth.currentUser()?.name }}
                 <span class="font-normal text-slate-400">·</span>

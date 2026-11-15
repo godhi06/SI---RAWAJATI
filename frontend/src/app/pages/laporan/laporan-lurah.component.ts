@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+﻿import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
@@ -26,7 +26,7 @@ import { DataService } from '../../core/data.service';
         class="mx-auto max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm print:max-w-none print:border-0 print:p-0 print:shadow-none"
       >
         <header class="border-b border-slate-200 pb-4 text-center">
-          <p class="text-xs font-bold uppercase tracking-[0.2em] text-blue-800">SI-RAWAJATI</p>
+          <p class="text-xs font-bold uppercase tracking-[0.2em] text-blue-800">JATI</p>
           <h2 class="mt-1 text-xl font-extrabold text-slate-900">Laporan Mingguan Kelurahan</h2>
           <p class="mt-1 text-sm font-semibold text-slate-700">{{ data.kelurahan.nama }}</p>
           <p class="text-xs text-slate-500">
@@ -135,7 +135,7 @@ import { DataService } from '../../core/data.service';
             <p>{{ auth.currentUser()?.jabatan }}</p>
           </div>
           <div>
-            <p class="mb-12">Dicetak dari SI-RAWAJATI</p>
+            <p class="mb-12">Dicetak dari JATI</p>
             <p>{{ data.formatTanggalId() }}</p>
           </div>
         </footer>

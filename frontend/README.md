@@ -1,4 +1,4 @@
-# SI-RAWAJATI — Prototipe Frontend
+﻿# JATI — Prototipe Frontend
 
 Angular 19 + Tailwind CSS — fokus **PSN Jumantik** dan **Operasional PPSU** Kelurahan Rawajati.
 

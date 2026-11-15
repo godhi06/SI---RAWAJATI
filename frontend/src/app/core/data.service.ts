@@ -1,4 +1,4 @@
-import { Injectable, computed, signal } from '@angular/core';
+﻿import { Injectable, computed, signal } from '@angular/core';
 import { createDemoSeed, KELURAHAN_DEMO } from './demo-seed';
 import {
   AbjSummary,
@@ -2116,7 +2116,7 @@ export class DataService {
       x: 55,
       y,
       size: 8,
-      text: `Tembusan: Ketua RT wilayah terkait. Dicatat oleh ${s.dibuatOleh} · SI-RAWAJATI (dokumen demo).`,
+      text: `Tembusan: Ketua RT wilayah terkait. Dicatat oleh ${s.dibuatOleh} · JATI (dokumen demo).`,
     });
 
     // Build content stream with absolute text positioning (centered via approx width)
@@ -2196,7 +2196,7 @@ export class DataService {
       `Nama         : ${input.nama}`,
       `Masa jabatan : ${input.mulai || '-'} s.d. ${input.selesai || '-'}`,
       '',
-      'Dokumen demo SI-RAWAJATI.',
+      'Dokumen demo JATI.',
       'Ganti dengan PDF/scan SK asli via Master Data > Edit > Unggah SK.',
       `File arsip: ${input.fileName.replace(/\.txt$/i, '.pdf')}`,
     ];

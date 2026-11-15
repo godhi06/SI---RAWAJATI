@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+﻿import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -138,7 +138,7 @@ const BULAN = [
         </section>
 
         <p class="mt-6 text-[10px] text-slate-500">
-          SI-RAWAJATI · transparansi kas RT · data iuran tertaut database warga (NIK/KK di sistem, tidak dicetak di
+          JATI · transparansi kas RT · data iuran tertaut database warga (NIK/KK di sistem, tidak dicetak di
           lembar publik)
         </p>
       </article>

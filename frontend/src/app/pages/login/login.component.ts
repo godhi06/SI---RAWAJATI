@@ -1,8 +1,9 @@
-import { Component, computed, inject, signal } from '@angular/core';
+﻿import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
+import { LOGIN_BRAND } from './login-brand';
 
 type LoginRole = 'RW' | 'RT' | 'DASAWISMA' | 'JUMANTIK' | 'PPSU' | 'STAF';
 
@@ -30,9 +31,9 @@ const ROLE_CARDS: RoleCard[] = [
     iconBg: 'bg-blue-100 text-blue-800',
     icon: 'SI',
     tugas: [
-      'Surat Keluar → sebar ke RW, Ketua RT, dan LMK',
-      'Agenda rapat & kerja bakti (biasanya Sekkel)',
-      'Pantauan lintas modul + export laporan resmi',
+      'Monitoring Lurah: radar, perintah, PSN/DAOP/PPSU — satu pantauan',
+      'Reporting & export laporan resmi bila diperlukan',
+      'Surat Keluar → sebar ke RW, Ketua RT, dan LMK + agenda Sekkel',
     ],
     demos: [
       {
@@ -42,12 +43,13 @@ const ROLE_CARDS: RoleCard[] = [
       },
       {
         email: 'lurah@kelurahan.id',
-        label: 'Lurah — Sariman, S.Sos, M.Si',
+        label: 'Lurah — Sariman, S.Sos, M.Si (monitoring + laporan)',
         hint: 'lurah@kelurahan.id · admin123',
       },
     ],
     panelTitle: 'Portal Staf Kelurahan',
-    panelBlurb: 'Lurah & Sekkel kirim undangan ke portal RW/RT dan WA langsung ke LMK.',
+    panelBlurb:
+      'Lurah pantau & laporan operasional; Sekkel sebar surat ke portal RW, Ketua RT, dan LMK.',
   },
   {
     id: 'RW',
@@ -174,94 +176,96 @@ const ROLE_CARDS: RoleCard[] = [
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   template: `
     <div class="min-h-screen lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
       <section
-        class="relative hidden min-h-screen overflow-hidden text-white lg:flex lg:flex-col"
+        class="relative hidden min-h-screen overflow-hidden border-r border-slate-200/80 lg:flex lg:flex-col"
         [class]="panelGradient()"
       >
-        <div class="pointer-events-none absolute -left-20 top-16 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
-        <div class="pointer-events-none absolute -bottom-8 right-0 h-80 w-80 rounded-full bg-white/10 blur-3xl"></div>
+        <div class="pointer-events-none absolute left-0 top-0 h-1.5 w-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500"></div>
+        <div class="pointer-events-none absolute -right-20 top-28 h-56 w-56 rounded-full bg-blue-400/15"></div>
+        <div class="pointer-events-none absolute -left-16 bottom-24 h-48 w-48 rounded-full bg-emerald-400/12"></div>
 
-        <div class="relative z-[1] flex flex-1 flex-col justify-center px-12 py-14 xl:px-16 xl:py-16">
-          <div class="max-w-lg">
-            <div
-              class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wider backdrop-blur"
-            >
-              <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
-              Kelurahan Rawajati
+        <div class="relative z-[1] flex flex-1 flex-col justify-between px-12 py-12 xl:px-16">
+          <div class="flex flex-1 flex-col justify-center">
+            <div class="max-w-lg">
+              <p class="text-4xl font-extrabold tracking-tight text-blue-700 xl:text-5xl">{{ brand.produk }}</p>
+              <p class="mt-1.5 text-sm font-medium text-slate-500">{{ brand.tempat }}</p>
+              <h1 class="mt-6 text-[1.65rem] font-bold leading-snug text-slate-900 xl:text-[1.85rem]">
+                {{ activeCard()?.panelTitle || brand.judul }}
+              </h1>
+              <p class="mt-3 max-w-md text-justify text-base font-medium leading-relaxed text-slate-700">
+                {{ activeCard()?.panelBlurb || brand.blurb }}
+              </p>
+
+              @if (activeCard(); as card) {
+                <ul class="mt-8 space-y-3">
+                  @for (t of card.tugas; track t) {
+                    <li
+                      class="flex gap-3 rounded-2xl border border-white bg-white/90 px-4 py-3.5 text-base leading-relaxed text-slate-800 shadow-sm shadow-slate-200/60 ring-1 ring-slate-100"
+                    >
+                      <span
+                        class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-xs font-bold text-white"
+                        >✓</span
+                      >
+                      <span>{{ t }}</span>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <ul class="mt-8 space-y-3 text-base leading-relaxed text-slate-800">
+                  @for (p of brand.poin; track p.judul; let i = $index) {
+                    <li
+                      class="flex gap-3 rounded-2xl border border-white bg-white/90 px-4 py-3.5 shadow-sm shadow-slate-200/60 ring-1 ring-slate-100"
+                    >
+                      <span
+                        class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-xs font-bold text-white"
+                        >{{ i + 1 }}</span
+                      >
+                      <span
+                        ><strong class="font-bold text-slate-900">{{ p.judul }}</strong>
+                        <span class="text-slate-600"> — {{ p.teks }}</span></span
+                      >
+                    </li>
+                  }
+                </ul>
+              }
             </div>
-
-            <p class="mt-8 text-sm font-bold uppercase tracking-[0.22em] text-white/70">SI-RAWAJATI</p>
-            <h1 class="mt-3 text-4xl font-extrabold leading-[1.1] tracking-tight xl:text-5xl">
-              {{ activeCard()?.panelTitle || 'Satu sistem, banyak portal kerja' }}
-            </h1>
-            <p class="mt-4 max-w-md text-base leading-relaxed text-white/85 xl:text-lg">
-              {{
-                activeCard()?.panelBlurb ||
-                  'Pilih peran di kanan — RT, RW, Jumantik, PPSU, Dasawisma, dan staf kelurahan masuk ke tugas masing-masing.'
-              }}
-            </p>
-
-            @if (activeCard(); as card) {
-              <ul class="mt-8 space-y-2.5">
-                @for (t of card.tugas; track t) {
-                  <li class="flex gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    <span class="mt-0.5 font-bold text-emerald-200">✓</span>
-                    <span>{{ t }}</span>
-                  </li>
-                }
-              </ul>
-            } @else {
-              <ul class="mt-8 space-y-2.5 text-sm text-white/90">
-                <li class="flex gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur">
-                  <span class="mt-0.5 font-bold text-emerald-200">1</span>
-                  <span>Data warga + kas RT digital (NIK/KK, lansia, janda, bansos)</span>
-                </li>
-                <li class="flex gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur">
-                  <span class="mt-0.5 font-bold text-emerald-200">2</span>
-                  <span>PSN Jumantik, DAOP, PPSU lapangan — pantauan Lurah</span>
-                </li>
-                <li class="flex gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur">
-                  <span class="mt-0.5 font-bold text-emerald-200">3</span>
-                  <span>Siap pitch: radar operasional kelurahan, bukan Excel berceceran</span>
-                </li>
-              </ul>
-            }
           </div>
+          <p class="pt-10 text-sm text-slate-500">{{ brand.footer }}</p>
         </div>
-
-        <p class="relative z-[1] px-12 pb-10 text-sm text-white/70 xl:px-16">
-          Kelurahan Rawajati · Kec. Pancoran, Jakarta Selatan
-        </p>
       </section>
 
       <section class="flex items-start justify-center bg-slate-50 px-4 py-8 sm:px-8 lg:items-center lg:py-12">
         <div class="w-full max-w-md">
           <div class="mb-6 lg:hidden">
-            <p class="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">SI-RAWAJATI</p>
-            <h1 class="mt-2 text-2xl font-extrabold text-slate-900">
-              {{ activeCard()?.panelTitle || 'Masuk sesuai peran Anda' }}
+            <p class="text-3xl font-extrabold tracking-tight text-blue-700">{{ brand.produk }}</p>
+            <p class="mt-1 text-sm text-slate-500">{{ brand.tempat }}</p>
+            <h1 class="mt-4 text-xl font-bold leading-snug text-slate-900">
+              {{ activeCard()?.panelTitle || brand.judul }}
             </h1>
-            <p class="mt-2 text-sm text-slate-500">
-              {{
-                activeCard()?.panelBlurb ||
-                  'Ketua RT, Ketua RW, Staff Jumantik, dan Staff PPSU punya tugas berbeda.'
-              }}
+            <p class="mt-2 text-justify text-sm font-medium leading-relaxed text-slate-700">
+              {{ activeCard()?.panelBlurb || brand.blurb }}
             </p>
           </div>
 
           <div class="card">
             @if (!role()) {
-              <h2 class="text-xl font-extrabold text-slate-900">Masuk sebagai</h2>
-              <p class="mt-1 text-sm text-slate-500">
-                Pilih peran dulu — tampilan &amp; tugas mengikuti portal masing-masing.
+              <a
+                routerLink="/login-production"
+                class="mb-5 flex items-center justify-between gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-100"
+              >
+                <span>Preview login production</span>
+                <span aria-hidden="true">→</span>
+              </a>
+              <h2 class="text-xl font-extrabold tracking-tight text-slate-900">Masuk sebagai</h2>
+              <p class="mt-1.5 text-sm leading-relaxed text-slate-500">
+                Mode demo — pilih peran dulu, lalu akun contoh.
               </p>
-              <div class="mt-3 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2.5 text-xs leading-relaxed text-blue-900">
-                <strong>Demo SI-RAWAJATI.</strong> Nanti akun bisa memakai email staf masing-masing.
-                Untuk dicoba sekarang, pilih peran lalu pakai akun contoh di bawah.
-                <a class="mt-1 block font-bold text-blue-800 underline" href="/cara-coba.html" target="_blank" rel="noopener"
+              <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-xs leading-relaxed text-slate-600">
+                <strong class="text-slate-800">Demo JATI.</strong> Untuk pitch: pilih peran lalu pakai akun contoh.
+                <a class="mt-1.5 block font-semibold text-blue-700 hover:underline" href="/cara-coba.html" target="_blank" rel="noopener"
                   >Panduan singkat (1 halaman)</a
                 >
               </div>
@@ -420,6 +424,7 @@ export class LoginComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
+  readonly brand = LOGIN_BRAND;
   readonly roles = ROLE_CARDS;
   readonly role = signal<LoginRole | null>(null);
   readonly error = signal<string | null>(null);
@@ -435,17 +440,19 @@ export class LoginComponent {
   panelGradient(): string {
     switch (this.role()) {
       case 'RW':
-        return 'bg-gradient-to-br from-sky-700 via-sky-800 to-cyan-700';
+        return 'bg-gradient-to-br from-[#e4f2fb] via-[#f5f9fc] to-[#eef6fb]';
       case 'RT':
-        return 'bg-gradient-to-br from-amber-700 via-orange-800 to-amber-900';
+        return 'bg-gradient-to-br from-[#f7efe4] via-[#fbf8f4] to-[#f3f0ea]';
+      case 'DASAWISMA':
+        return 'bg-gradient-to-br from-[#f8e9ed] via-[#fbf5f6] to-[#f5eef1]';
       case 'JUMANTIK':
-        return 'bg-gradient-to-br from-emerald-700 via-teal-800 to-emerald-900';
+        return 'bg-gradient-to-br from-[#e5f5ec] via-[#f4faf6] to-[#eef7f2]';
       case 'PPSU':
-        return 'bg-gradient-to-br from-indigo-700 via-slate-800 to-indigo-900';
+        return 'bg-gradient-to-br from-[#e8eaf6] via-[#f5f6fb] to-[#eef0f7]';
       case 'STAF':
-        return 'bg-gradient-to-br from-blue-700 via-blue-800 to-emerald-700';
+        return LOGIN_BRAND.panelClass;
       default:
-        return 'bg-gradient-to-br from-blue-700 via-blue-800 to-slate-800';
+        return LOGIN_BRAND.panelClass;
     }
   }
 

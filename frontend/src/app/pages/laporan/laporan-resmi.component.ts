@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+﻿import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DataService } from '../../core/data.service';
@@ -136,7 +136,7 @@ import { DataService } from '../../core/data.service';
             bulan ini.
           </p>
           <p class="text-xs text-slate-500">
-            Catatan: Ambang aman ABJ internal kelurahan adalah ≥ 95%. Dokumen ini merupakan keluaran SI-RAWAJATI untuk
+            Catatan: Ambang aman ABJ internal kelurahan adalah ≥ 95%. Dokumen ini merupakan keluaran JATI untuk
             pendukung operasional Kelurahan Rawajati.
           </p>
         </section>

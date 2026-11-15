@@ -1,4 +1,4 @@
-export type UserRole = 'ADMIN_KEL' | 'KOORD_RW' | 'OP_RT' | 'PETUGAS_PPSU';
+﻿export type UserRole = 'ADMIN_KEL' | 'KOORD_RW' | 'OP_RT' | 'PETUGAS_PPSU';
 
 export type JenisKerjaPpsu = 'KURAS_SALURAN' | 'SAPU_JALAN' | 'BABAT_RUMPUT';
 
@@ -598,7 +598,7 @@ export interface SuratKeluar {
   dibuatOleh: string;
   catatan?: string;
   /**
-   * Siapa yang menerima di SI-RAWAJATI / WA:
+   * Siapa yang menerima di JATI / WA:
    * RW = portal Ketua RW, RT = portal Ketua RT, LMK = blast WA dari kelurahan.
    */
   penerimaJenis?: PenerimaSuratKelurahan[];

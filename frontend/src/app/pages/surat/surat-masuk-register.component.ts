@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+﻿import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -168,7 +168,7 @@ import { StatusSuratMasuk } from '../../core/models';
         </footer>
 
         <p class="mt-6 text-[10px] text-slate-400 print:mt-4">
-          SI-RAWAJATI · Register surat masuk · dicetak dari data operasional Surat Masuk Dinas
+          JATI · Register surat masuk · dicetak dari data operasional Surat Masuk Dinas
         </p>
       </article>
     </div>

@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+﻿import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -294,7 +294,7 @@ export class DaopCetakComponent {
 
   <div class="alur">
     Alur Ketua RT: unduh Word → isi &amp; TTD Ketua + Bendahara → cetak kertas → stempel basah Ketua RT
-    → foto/scan → upload di SI-RAWAJATI (atau datang ke kelurahan dibantu staf).
+    → foto/scan → upload di JATI (atau datang ke kelurahan dibantu staf).
   </div>
 </body>
 </html>`;

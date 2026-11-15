@@ -25,6 +25,7 @@ import { KasRwCetakComponent } from './pages/kas/kas-rw-cetak.component';
 import { RekapWargaRwComponent } from './pages/warga/rekap-warga-rw.component';
 import { ShellComponent } from './layout/shell.component';
 import { LoginComponent } from './pages/login/login.component';
+import { LoginProductionComponent } from './pages/login/login-production.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { PsnInputComponent } from './pages/psn/psn-input.component';
 import { PsnListComponent } from './pages/psn/psn-list.component';
@@ -59,6 +60,7 @@ import { EventBesarComponent } from './pages/event/event-besar.component';
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
   { path: 'login', component: LoginComponent },
+  { path: 'login-production', component: LoginProductionComponent },
   {
     path: 'app',
     component: ShellComponent,

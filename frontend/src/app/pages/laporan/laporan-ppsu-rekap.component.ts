@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+﻿import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DataService } from '../../core/data.service';
@@ -129,7 +129,7 @@ import { DataService } from '../../core/data.service';
         </section>
 
         <p class="mt-6 text-xs text-slate-500">
-          Dokumen pendukung operasional SI-RAWAJATI · Kelurahan Rawajati. Bukan pengganti sistem resmi Pemprov DKI.
+          Dokumen pendukung operasional JATI · Kelurahan Rawajati. Bukan pengganti sistem resmi Pemprov DKI.
         </p>
 
         <section class="mt-14 grid grid-cols-2 gap-8 text-center text-sm">

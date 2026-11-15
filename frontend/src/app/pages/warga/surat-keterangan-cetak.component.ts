@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+﻿import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -158,7 +158,7 @@ type PerihalSk =
           </div>
 
           <p class="mt-6 text-[10px] text-slate-500">
-            SI-RAWAJATI · buku {{ meta().buku }} · {{ auth.currentUser()?.name }}
+            JATI · buku {{ meta().buku }} · {{ auth.currentUser()?.name }}
           </p>
         </article>
       } @else {

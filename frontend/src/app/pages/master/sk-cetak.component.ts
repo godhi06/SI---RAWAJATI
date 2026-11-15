@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+﻿import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -89,7 +89,7 @@ type JenisSk = 'RW' | 'RT' | 'LMK';
           </div>
 
           <p class="mt-8 text-[10px] text-slate-500 print:mt-6">
-            Dicetak dari SI-RAWAJATI · {{ d.jenisLabel }} · {{ auth.currentUser()?.name }}
+            Dicetak dari JATI · {{ d.jenisLabel }} · {{ auth.currentUser()?.name }}
           </p>
         </article>
       } @else {
